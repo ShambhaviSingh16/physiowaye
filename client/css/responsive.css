@@ -197,3 +197,34 @@ textarea{
 }
 
 }
+/* MOBILE MENU LOGIN BUTTON FIX */
+
+@media (max-width:768px){
+
+.login-btn{
+  width:100%;
+  display:block;
+  text-align:center;
+  padding:12px;
+  margin-top:10px;
+
+  border-radius:6px;
+  background:linear-gradient(135deg,#4da6c8,#2b8db3);
+  color:white !important;
+
+  font-weight:600;
+}
+
+}
+
+@media (max-width:768px){
+
+.nav-links{
+  gap:15px;
+}
+
+.nav-links a{
+  font-size:18px;
+}
+
+}
