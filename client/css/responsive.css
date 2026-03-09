@@ -228,3 +228,29 @@ textarea{
 }
 
 }
+
+@media (max-width:768px){
+
+.cart-item{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.cart-controls{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+
+.cart-controls button{
+padding:6px 10px;
+font-size:14px;
+}
+
+.product-card{
+padding:20px;
+margin:10px;
+}
+
+}

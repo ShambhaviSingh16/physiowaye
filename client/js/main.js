@@ -23,4 +23,28 @@ document.addEventListener("DOMContentLoaded", () => {
       menuToggle.classList.remove("active");
     });
   });
+
+  document.addEventListener("click", (e) => {
+
+    const navLinks = document.getElementById("navLinks");
+
+    const toggle = document.getElementById("menuToggle");
+
+    if (!navLinks.contains(e.target) && !toggle.contains(e.target)) {
+
+      navLinks.classList.remove("active");
+
+      toggle.classList.remove("active");
+
+    }
+
+  });
+});
+document.querySelectorAll(".nav-links a").forEach(link => {
+link.addEventListener("click", () => {
+
+navLinks.classList.remove("active");
+toggle.classList.remove("active");
+
+});
 });

@@ -75,13 +75,44 @@ async function register() {
 document.addEventListener("DOMContentLoaded", () => {
   const user = sessionStorage.getItem("user");
   const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
   const cartBtn = document.getElementById("cartBtn");
 
   if (user) {
     loginBtn?.classList.add("hidden");
+    logoutBtn?.classList.remove("hidden");
     cartBtn?.classList.remove("hidden");
   } else {
     loginBtn?.classList.remove("hidden");
+    logoutBtn?.classList.add("hidden");
     cartBtn?.classList.add("hidden");
   }
+updateCartCount();
+
+});
+  function updateCartCount(){
+
+const user = JSON.parse(sessionStorage.getItem("user"));
+
+if(!user) return;
+
+const cart = JSON.parse(localStorage.getItem("cart_"+user.id)) || [];
+
+let total = 0;
+
+cart.forEach(i => total += i.qty);
+
+const badge = document.getElementById("cartCount");
+
+if(badge) badge.innerText = total;
+
+}
+
+
+document.getElementById("logoutBtn")?.addEventListener("click", () => {
+
+sessionStorage.removeItem("user");
+
+window.location.href = "index.html";
+
 });

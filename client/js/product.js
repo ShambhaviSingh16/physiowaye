@@ -30,15 +30,14 @@ function addToCart(id) {
   }
 
   const cartKey = `cart_${user.id}`;
-
-  let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+let cart = JSON.parse(localStorage.getItem("cart_"+user.id)) || [];
 
   const existing = cart.find(i => i.id === id);
 
   if (existing) existing.qty++;
   else cart.push({ id, qty: 1 });
 
-  localStorage.setItem(cartKey, JSON.stringify(cart));
+localStorage.setItem("cart_"+user.id, JSON.stringify(cart));
 
   alert("Product added to cart");
 }
