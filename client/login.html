@@ -1,0 +1,65 @@
+
+ <!-- <section class="product-details">
+  <div class="product-card"> -->
+
+
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | PhysioWaye</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="navbar">
+    <div class="nav-container">
+
+      <div class="logo-wrapper">
+        <img src="assets/images/logo.png" alt="PhysioWaye Logo" class="logo">
+      </div>
+
+    <nav class="nav-links">
+  <a href="index.html">Home</a>
+  <a href="products.html">Products</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+
+  <!-- Login -->
+  <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+
+  <!-- Cart (hidden by default) -->
+  <a href="cart.html" id="cartBtn" class="cart-btn hidden">
+    🛒 Cart
+  </a>
+</nav>
+
+
+      <!-- Mobile Menu Icon -->
+      <div class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+    </div>
+  </header>
+
+
+<div class="auth-box">
+  <h1>Customer Login</h1>
+
+  <input type="email" id="email" placeholder="Email Address">
+  <input type="password" id="password" placeholder="Password">
+
+  <button onclick="login()">Login</button>
+
+  <p id="loginError" style="color:red;"></p>
+
+  <p>New user?
+    <a href="register.html">Create an account</a>
+  </p>
+</div>
+
+<script src="js/auth.js"></script>
+</body>
+</html>

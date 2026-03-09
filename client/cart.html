@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Cart | PhysioWaye</title>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+
+      <div class="logo-wrapper">
+        <img src="assets/images/logo.png" alt="PhysioWaye Logo" class="logo">
+      </div>
+
+      <nav class="nav-links">
+  <a href="index.html">Home</a>
+  <a href="products.html">Products</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+
+  <!-- Login -->
+  <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+
+  <!-- Cart (hidden by default) -->
+  <a href="cart.html" id="cartBtn" class="cart-btn hidden">
+    🛒 Cart
+  </a>
+</nav>
+
+
+      <!-- Mobile Menu Icon -->
+      <div class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+    </div>
+  </header>
+
+
+  <section class="product-details">
+    <div class="product-card">
+      <h1>Your Cart</h1>
+      <div id="cartItems"></div>
+      <br>
+      <h3 id="total"></h3>
+      
+  <a href="checkout.html" class="btn-primary">Proceed to Checkout</a>
+
+    </div>
+  </section>
+   <!-- Footer -->
+  <footer class="site-footer">
+  <div class="footer-container">
+
+    <div class="footer-brand">
+      <img src="assets/logo.png" alt="PhysioWaye Logo" class="footer-logo">
+      <p>
+        PhysioWaye provides high-quality physiotherapy and rehabilitation
+        equipment trusted by clinics, hospitals, and home users across India.
+      </p>
+    </div>
+
+    <div class="footer-links">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Contact</h4>
+      <p>Email: support@physiowaye.com</p>
+      <p>Phone: +91 9XXXXXXXXX</p>
+      <p>Location: India</p>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    © 2026 PhysioWaye. All rights reserved.
+  </div>
+</footer>
+<script src="js/auth.js"></script>
+
+  <script src="js/cart.js"></script>
+</body>
+</html>

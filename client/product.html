@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Details | PhysioWaye</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+
+      <div class="logo-wrapper">
+        <img src="assets/images/logo.png" class="logo" alt="PhysioWaye">
+      </div>
+
+      <nav class="nav-links">
+  <a href="index.html">Home</a>
+  <a href="products.html">Products</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+
+  <!-- Login -->
+  <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+
+  <!-- Cart (hidden by default) -->
+  <a href="cart.html" id="cartBtn" class="cart-btn hidden">
+    🛒 Cart
+  </a>
+</nav>
+
+
+      <div class="menu-toggle" id="menuToggle">
+        <span></span><span></span><span></span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Product Details -->
+  <section class="product-details">
+    <div class="product-card" id="productCard">
+      <!-- Loaded via JS -->
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2026 PhysioWaye. All rights reserved.</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/product.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
