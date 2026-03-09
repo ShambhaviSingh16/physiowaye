@@ -8,7 +8,9 @@ const cartItemsDiv = document.getElementById("cartItems");
 const totalDiv = document.getElementById("total");
 
 async function loadCart() {
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const userObj = JSON.parse(sessionStorage.getItem("user"));
+const cartKey = `cart_${userObj.id}`;
+const cart = JSON.parse(localStorage.getItem(cartKey)) || [];
 
   if (cart.length === 0) {
     cartItemsDiv.innerHTML = "<p>Your cart is empty.</p>";

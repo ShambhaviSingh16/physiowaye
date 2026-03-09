@@ -21,17 +21,24 @@ fetch(`https://physiowaye.onrender.com/api/products/${productId}`)
   });
 
 function addToCart(id) {
-  if (!sessionStorage.getItem("user")) {
+
+  const user = JSON.parse(sessionStorage.getItem("user"));
+
+  if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const cartKey = `cart_${user.id}`;
+
+  let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+
   const existing = cart.find(i => i.id === id);
 
   if (existing) existing.qty++;
   else cart.push({ id, qty: 1 });
 
-  localStorage.setItem("cart", JSON.stringify(cart));
+  localStorage.setItem(cartKey, JSON.stringify(cart));
+
   alert("Product added to cart");
 }
