@@ -87,6 +87,10 @@
 //   console.log("Server running on http://localhost:5000")
 // );
 
+app.get("/", (req, res) => {
+  res.send("Physiowaye API is running 🚀");
+});
+
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
