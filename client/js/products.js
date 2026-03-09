@@ -3,7 +3,7 @@ const grid = document.getElementById("productsGrid");
 const searchInput = document.getElementById("searchInput");
 
 function loadProducts(search = "") {
-  fetch(`http://localhost:5000/api/products?search=${search}`)
+  fetch(`https://physiowaye.onrender.com/api/products?search=${search}`)
     .then(res => res.json())
     .then(products => {
       grid.innerHTML = "";

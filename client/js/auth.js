@@ -1,4 +1,4 @@
-const API = "http://localhost:5000/api";
+const API = "https://physiowaye.onrender.com/api";
 
 /* ---------- LOGIN ---------- */
 async function login() {

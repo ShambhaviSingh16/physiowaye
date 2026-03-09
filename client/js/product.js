@@ -3,7 +3,7 @@ const params = new URLSearchParams(window.location.search);
 const productId = params.get("id");
 const productCard = document.getElementById("productCard");
 
-fetch(`http://localhost:5000/api/products/${productId}`)
+fetch(`https://physiowaye.onrender.com/api/products/${productId}`)
   .then(res => res.json())
   .then(product => {
     productCard.innerHTML = `

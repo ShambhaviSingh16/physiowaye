@@ -21,7 +21,7 @@ async function loadCart() {
 
   for (const item of cart) {
     const res = await fetch(
-      `http://localhost:5000/api/products/${item.id}`
+      `https://physiowaye.onrender.com/api/products/${item.id}`
     );
     const product = await res.json();
 
