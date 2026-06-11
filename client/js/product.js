@@ -5,20 +5,42 @@ const productCard = document.getElementById("productCard");
 
 fetch(`https://physiowaye.onrender.com/api/products/${productId}`)
   .then(res => res.json())
-  .then(product => {
-    productCard.innerHTML = `
-      <h1>${product.name}</h1>
-      <p class="product-desc">${product.description}</p>
-      <p class="price">
-        ₹${product.price}
-        <span class="mrp">₹${product.mrp}</span>
-        <span class="discount">(${product.discount}% OFF)</span>
-      </p>
-      <button class="btn-primary" onclick="addToCart(${product.id})">
-        Add to Cart
-      </button>
-    `;
-  });
+.then(product => {
+
+  const discountPercent =
+    Math.round(
+      ((product.mrp - product.selling_price) /
+      product.mrp) * 100
+    );
+
+  productCard.innerHTML = `
+    <h1>${product.product_name}</h1>
+
+    <p class="product-desc">
+      ${product.description}
+    </p>
+
+    <p class="price">
+      ₹${product.selling_price}
+
+      <span class="mrp">
+        ₹${product.mrp}
+      </span>
+
+      <span class="discount">
+        (${discountPercent}% OFF)
+      </span>
+    </p>
+
+    <button
+      class="btn-primary"
+      onclick="addToCart(${product.id})">
+
+      Add to Cart
+
+    </button>
+  `;
+});
 
 function addToCart(id) {
 

@@ -27,13 +27,13 @@ async function loadCart() {
     );
     const product = await res.json();
 
-    const itemTotal = product.price * item.qty;
+    const itemTotal = product.selling_price * item.qty;
     total += itemTotal;
 
     cartItemsDiv.innerHTML += `
 <div class="cart-item">
 
-<strong>${product.name}</strong>
+<strong>${product.product_name}</strong>
 
 <div class="cart-controls">
 
@@ -49,8 +49,7 @@ Remove
 
 </div>
 
-<p>₹${product.price} × ${item.qty} = ₹${itemTotal}</p>
-
+<p>₹${product.selling_price} × ${item.qty} = ₹${itemTotal}</p>
 <hr>
 
 </div>
@@ -62,39 +61,39 @@ Remove
 
 loadCart();
 updateCartCount();
-function changeQty(id, change){
+function changeQty(id, change) {
 
-const user = JSON.parse(sessionStorage.getItem("user"));
-let cart = JSON.parse(localStorage.getItem("cart_"+user.id)) || [];
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  let cart = JSON.parse(localStorage.getItem("cart_" + user.id)) || [];
 
-const item = cart.find(i => i.id === id);
+  const item = cart.find(i => i.id === id);
 
-if(!item) return;
+  if (!item) return;
 
-item.qty += change;
+  item.qty += change;
 
-if(item.qty <= 0){
-cart = cart.filter(i => i.id !== id);
+  if (item.qty <= 0) {
+    cart = cart.filter(i => i.id !== id);
+  }
+
+  localStorage.setItem("cart_" + user.id, JSON.stringify(cart));
+
+  loadCart();
+  updateCartCount();
 }
 
-localStorage.setItem("cart_"+user.id, JSON.stringify(cart));
 
-loadCart();
-updateCartCount();
-}
+function removeItem(id) {
 
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
-function removeItem(id){
+  let cart = JSON.parse(localStorage.getItem("cart_" + user.id)) || [];
 
-const user = JSON.parse(sessionStorage.getItem("user"));
+  cart = cart.filter(i => i.id !== id);
 
-let cart = JSON.parse(localStorage.getItem("cart_"+user.id)) || [];
+  localStorage.setItem("cart_" + user.id, JSON.stringify(cart));
 
-cart = cart.filter(i => i.id !== id);
-
-localStorage.setItem("cart_"+user.id, JSON.stringify(cart));
-
-loadCart();
-updateCartCount();
+  loadCart();
+  updateCartCount();
 
 }

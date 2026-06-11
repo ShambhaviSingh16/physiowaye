@@ -60,31 +60,8 @@
   </p>
 </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/main.js"></script>
 </html>
-
-
-<!-- <script>
-async function register() {
-  const name = nameInput.value;
-  const email = emailInput.value;
-  const password = passwordInput.value;
-
-  const res = await fetch("http://localhost:5000/api/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password })
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    error.innerText = data.message;
-    return;
-  }
-
-  alert("Registered successfully. Please login.");
-  window.location.href = "login.html";
-}
-</script> -->
