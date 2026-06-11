@@ -14,32 +14,63 @@ fetch(`https://physiowaye.onrender.com/api/products/${productId}`)
     );
 
   productCard.innerHTML = `
-    <h1>${product.product_name}</h1>
 
-    <p class="product-desc">
-      ${product.description}
-    </p>
+<div class="product-detail-layout">
 
-    <p class="price">
-      ₹${product.selling_price}
+<div>
 
-      <span class="mrp">
-        ₹${product.mrp}
-      </span>
+<img
+src="https://placehold.co/700x500/e5e7eb/64748b?text=PhysioWaye"
+style="
+width:100%;
+border-radius:20px;
+"
+>
 
-      <span class="discount">
-        (${discountPercent}% OFF)
-      </span>
-    </p>
+</div>
 
-    <button
-      class="btn-primary"
-      onclick="addToCart(${product.id})">
+<div>
 
-      Add to Cart
+<h1>${product.product_name}</h1>
 
-    </button>
-  `;
+<br>
+
+<p class="product-desc">
+${product.description}
+</p>
+
+<br>
+
+<h2>
+₹${product.selling_price}
+</h2>
+
+<p>
+
+<span style="text-decoration:line-through">
+₹${product.mrp}
+</span>
+
+<span style="color:green">
+(${discountPercent}% OFF)
+</span>
+
+</p>
+
+<br>
+
+<button
+class="btn-primary"
+onclick="addToCart(${product.id})">
+
+Add To Cart
+
+</button>
+
+</div>
+
+</div>
+`;
 });
 
 function addToCart(id) {

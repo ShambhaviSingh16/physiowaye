@@ -19,39 +19,55 @@ function loadProducts(search = "") {
           );
 
         grid.innerHTML += `
-          <div class="feature-card">
 
-            <h3>${p.product_name}</h3>
+<div class="product-modern">
 
-            <p>${p.description}</p>
+<img
+src="https://placehold.co/600x400/e5e7eb/64748b?text=PhysioWaye"
+class="product-image"
+>
 
-            <p>
+<div class="product-content">
 
-              ₹${p.selling_price}
+<span class="discount-badge">
+${discountPercent}% OFF
+</span>
 
-              <span style="text-decoration:line-through">
+<h3>${p.product_name}</h3>
 
-                ₹${p.mrp}
+<p>${p.description.substring(0,120)}...</p>
 
-              </span>
+<br>
 
-              <span style="color:green">
+<div class="product-price">
 
-                (${discountPercent}% OFF)
+₹${p.selling_price}
 
-              </span>
+<span style="
+text-decoration:line-through;
+font-size:16px;
+color:gray;
+">
+₹${p.mrp}
+</span>
 
-            </p>
+</div>
 
-            <a href="product.html?id=${p.id}"
-               class="btn-primary">
+<br>
 
-              View Details
+<a
+href="product.html?id=${p.id}"
+class="btn-primary">
 
-            </a>
+View Details
 
-          </div>
-        `;
+</a>
+
+</div>
+
+</div>
+
+`;
       });
 
     })
