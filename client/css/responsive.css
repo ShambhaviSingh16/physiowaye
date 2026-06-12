@@ -254,3 +254,20 @@ margin:10px;
 }
 
 }
+
+@media(max-width:900px){
+
+.auth-section{
+    flex-direction:column;
+}
+
+.auth-left{
+    text-align:center;
+}
+
+.auth-card{
+    width:100%;
+    max-width:420px;
+}
+
+}
