@@ -1,6 +1,6 @@
 <h1 align="center">PhysioWaye</h1>
 <p align="center">
-  <strong>Physiotherapy Equipment E-Commerce Platform</strong><br/>
+  <strong>Production-Ready Healthcare E-Commerce Platform</strong><br/>
   A production-grade, full-stack e-commerce application with enterprise security, real payment processing, and clean architecture.
 </p>
 
@@ -121,6 +121,21 @@ physiowaye/
 
 ---
 
+<!--## System Architecture
+
+Frontend (Next.js)
+       │
+       ▼
+Express REST API
+       │
+ ┌─────┼─────┐
+ ▼     ▼     ▼
+Supabase  Razorpay  Email Service
+PostgreSQL Webhooks Resend
+
+---
+-->
+
 ## Getting Started
 
 ### Prerequisites
@@ -190,6 +205,24 @@ CLIENT_URL=http://localhost:3000
 
 ---
 
+<!--
+
+## API Architecture
+
+/api/v1
+├── auth
+├── products
+├── wishlist
+├── reviews
+├── addresses
+├── orders
+├── payments
+├── coupons
+└── admin
+
+---
+-->
+
 ## API Reference
 
 Live interactive docs: `https://your-backend-url/api/docs` (Swagger UI)
@@ -241,6 +274,8 @@ Key tables in PostgreSQL (Supabase):
 
 All user-specific tables enforce **Row Level Security** — users can only read and write their own rows, enforced at the database level independently of application logic.
 
+![ER Diagram](docs/er-diagram.png)
+
 ---
 
 ## Deployment
@@ -254,6 +289,23 @@ All user-specific tables enforce **Row Level Security** — users can only read 
 | Custom domain | physiowaye.com | Already purchased |
 
 ---
+
+## Screenshots
+
+### Home Page
+![Home](docs/home.png)
+
+### Product Catalog
+![Catalog](docs/catalog.png)
+
+### Admin Dashboard
+![Dashboard](docs/dashboard.png)
+
+### Checkout Flow
+![Checkout](docs/checkout.png)
+
+---
+
 
 ## Roadmap
 
