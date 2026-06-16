@@ -23,6 +23,20 @@ The project is built for long-term production use on a cost-minimal infrastructu
 
 ---
 
+## Key Engineering Highlights
+
+- Repository Pattern + Layered Architecture
+- JWT Authentication + RBAC
+- Razorpay Payment Integration + Webhooks
+- Swagger/OpenAPI Documentation
+- CI/CD via GitHub Actions
+- PostgreSQL with Row-Level Security
+- Winston Structured Logging
+- Health Check API
+- Progressive Web App (PWA)
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -121,20 +135,20 @@ physiowaye/
 
 ---
 
-<!--## System Architecture
+## System Architecture
 
-Frontend (Next.js)
-       │
-       ▼
-Express REST API
-       │
- ┌─────┼─────┐
- ▼     ▼     ▼
-Supabase  Razorpay  Email Service
-PostgreSQL Webhooks Resend
+```mermaid
+graph TD
+    A[Next.js Frontend] --> B[Express REST API]
+
+    B --> C[Supabase PostgreSQL]
+    B --> D[Razorpay]
+    B --> E[Resend Email Service]
+
+    D --> B
+```
 
 ---
--->
 
 ## Getting Started
 
@@ -205,10 +219,9 @@ CLIENT_URL=http://localhost:3000
 
 ---
 
-<!--
-
 ## API Architecture
 
+```text
 /api/v1
 ├── auth
 ├── products
@@ -219,9 +232,10 @@ CLIENT_URL=http://localhost:3000
 ├── payments
 ├── coupons
 └── admin
+```
 
 ---
--->
+
 
 ## API Reference
 
