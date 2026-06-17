@@ -349,7 +349,7 @@ npm run dev
 📧 Sshambhavi89@gmail.com &nbsp;|&nbsp;
 🔗 [LinkedIn](https://linkedin.com/in/shambhavi-singh) &nbsp;|&nbsp;
 🐙 [GitHub](https://github.com/ShambhaviSingh16) &nbsp;|&nbsp;
-🌐 [Portfolio](https://your-portfolio-url)
+🌐 [Portfolio](https://shambhavisingh.vercel.app/)
 
 ---
 
