@@ -347,7 +347,7 @@ npm run dev
 
 **Shambhavi Singh** — Software Engineer  
 📧 Sshambhavi89@gmail.com &nbsp;|&nbsp;
-🔗 [LinkedIn](https://linkedin.com/in/shambhavi-singh) &nbsp;|&nbsp;
+🔗 [LinkedIn](https://www.linkedin.com/in/shambhavi-singh2023) &nbsp;|&nbsp;
 🐙 [GitHub](https://github.com/ShambhaviSingh16) &nbsp;|&nbsp;
 🌐 [Portfolio](https://shambhavisingh.vercel.app/)
 
