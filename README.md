@@ -61,7 +61,7 @@ The project is built for long-term production use on a cost-minimal infrastructu
 - Email notifications (order confirmation, status changes)
 
 ### 🔐 Security & Authentication
-- JWT authentication with 3-role RBAC: `customer`, `admin`, `super_admin`
+- JWT authentication with 2-role RBAC: `customer`, `admin`
 - Supabase Google OAuth + email/password login with bcrypt password hashing
 - PostgreSQL Row Level Security (RLS) on all user-specific tables
 - Rate limiting on all API endpoints (express-rate-limiter)
