@@ -193,7 +193,7 @@ Live interactive docs: `https://your-backend-url/api/docs` (Swagger UI)
 
 | Table | Description |
 |---|---|
-| `users` | Accounts — role: `customer`, `admin`, `super_admin` |
+| `users` | Accounts — role: `customer`, `admin` |
 | `products` | Product catalog — `is_deleted` soft delete |
 | `categories` | Product categories |
 | `cart_items` | Per-user cart (RLS enforced) |
