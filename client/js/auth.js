@@ -103,6 +103,39 @@ async function googleLogin() {
 
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+
+  const loginForm =
+    document.getElementById("loginForm");
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await login();
+    });
+  }
+
+  const registerForm =
+    document.getElementById("registerForm");
+
+  if (registerForm) {
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await register();
+    });
+  }
+
+  const googleBtn =
+    document.getElementById("googleLoginBtn");
+
+  if (googleBtn) {
+    googleBtn.addEventListener("click", async () => {
+      await googleLogin();
+    });
+  }
+
+});
+
 /* =========================================
    NAVBAR CONTROL
 ========================================= */
