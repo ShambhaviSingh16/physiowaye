@@ -5,60 +5,93 @@ if (!user) {
     window.location.href = "login.html";
 }
 
-const cart =
-JSON.parse(
-localStorage.getItem("cart_" + user.id)
-) || [];
+
 
 const summary =
 document.getElementById("orderSummary");
 
 let totalItems = 0;
 
-function renderSummary() {
 
-    if(cart.length === 0){
 
-        summary.innerHTML = `
+async function renderSummary() {
+
+  try {
+
+    const res = await fetch(
+      `https://physiowaye.onrender.com/api/cart/${user.id}`
+    );
+
+    const cart = await res.json();
+
+    if (!cart.length) {
+
+      summary.innerHTML = `
         <div class="empty-checkout">
-            <h2>Your Cart is Empty</h2>
-            <p>Add products before checkout.</p>
+          <h2>Your Cart is Empty</h2>
+          <p>Add products before checkout.</p>
         </div>
-        `;
+      `;
 
-        document.querySelector(".place-order-btn").style.display = "none";
+      document.querySelector(
+        ".place-order-btn"
+      ).style.display = "none";
 
-        return;
+      return;
     }
+
+    let totalItems = 0;
+    let totalPrice = 0;
 
     let html = "";
 
     cart.forEach(item => {
 
-        totalItems += item.qty;
+      totalItems += item.quantity;
 
-        html += `
+      totalPrice +=
+        item.products.selling_price *
+        item.quantity;
+
+      html += `
         <div class="order-item">
-            <div>
-                <div class="order-name">
-                    Product ID #${item.id}
-                </div>
 
-                <div class="order-qty">
-                    Quantity : ${item.qty}
-                </div>
+          <div>
+
+            <div class="order-name">
+              ${item.products.product_name}
             </div>
+
+            <div class="order-qty">
+              Quantity: ${item.quantity}
+            </div>
+
+          </div>
+
+          <div>
+            ₹${item.products.selling_price * item.quantity}
+          </div>
+
         </div>
-        `;
+      `;
+
     });
 
     html += `
-    <div class="summary-box">
-        <h3>Total Items : ${totalItems}</h3>
-    </div>
+      <div class="summary-box">
+        <h3>Total Items: ${totalItems}</h3>
+        <h3>Total Amount: ₹${totalPrice}</h3>
+      </div>
     `;
 
     summary.innerHTML = html;
+
+  } catch(err) {
+
+    console.error(err);
+
+  }
+
 }
 
 renderSummary();
