@@ -143,6 +143,210 @@ app.get("/api/products/:id", async (req, res) => {
 
 });
 
+/* ---------- ADD TO CART ---------- */
+
+app.post("/api/cart", async (req, res) => {
+
+  try {
+
+    const { user_id, product_id, quantity } = req.body;
+
+    const { data: existing } = await supabase
+      .from("cart")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("product_id", product_id)
+      .single();
+
+    if (existing) {
+
+      const { error } = await supabase
+        .from("cart")
+        .update({
+          quantity: existing.quantity + quantity
+        })
+        .eq("id", existing.id);
+
+      if (error) {
+        return res.status(500).json(error);
+      }
+
+      return res.json({
+        message: "Cart updated"
+      });
+    }
+
+    const { error } = await supabase
+      .from("cart")
+      .insert([
+        {
+          user_id,
+          product_id,
+          quantity
+        }
+      ]);
+
+    if (error) {
+      return res.status(500).json(error);
+    }
+
+    res.json({
+      message: "Added to cart"
+    });
+
+  } catch (err) {
+
+    res.status(500).json(err);
+
+  }
+
+});
+
+/* ---------- GET USER CART ---------- */
+
+app.get("/api/cart/:userId", async (req, res) => {
+
+  try {
+
+    const { data, error } = await supabase
+      .from("cart")
+      .select(`
+        id,
+        quantity,
+        products (
+          id,
+          product_name,
+          selling_price,
+          mrp,
+          image_url
+        )
+      `)
+      .eq("user_id", req.params.userId);
+
+    if (error) {
+      return res.status(500).json(error);
+    }
+
+    res.json(data);
+
+  } catch (err) {
+
+    res.status(500).json(err);
+
+  }
+
+});
+
+/* ---------- REMOVE CART ITEM ---------- */
+
+app.delete("/api/cart/:cartId", async (req, res) => {
+
+  try {
+
+    const { error } = await supabase
+      .from("cart")
+      .delete()
+      .eq("id", req.params.cartId);
+
+    if (error) {
+      return res.status(500).json(error);
+    }
+
+    res.json({
+      success: true
+    });
+
+  } catch (err) {
+
+    res.status(500).json(err);
+
+  }
+
+});
+
+/* ---------- UPDATE CART QUANTITY ---------- */
+
+app.put("/api/cart/:cartId", async (req, res) => {
+
+  try {
+
+    const { quantity } = req.body;
+
+    const { error } = await supabase
+      .from("cart")
+      .update({ quantity })
+      .eq("id", req.params.cartId);
+
+    if (error) {
+      return res.status(500).json(error);
+    }
+
+    res.json({
+      success: true
+    });
+
+  } catch (err) {
+
+    res.status(500).json(err);
+
+  }
+
+});
+
+/* ---------- CREATE ORDER ---------- */
+
+app.post("/api/orders", async (req, res) => {
+
+  try {
+
+    const { user_id, items, total_amount } = req.body;
+
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .insert([
+        {
+          user_id,
+          total_amount,
+          status: "Pending"
+        }
+      ])
+      .select()
+      .single();
+
+    if (orderError) {
+      return res.status(500).json(orderError);
+    }
+
+    const orderItems = items.map(item => ({
+      order_id: order.id,
+      product_id: item.id,
+      quantity: item.qty,
+      price: item.price
+    }));
+
+    const { error: itemError } = await supabase
+      .from("order_items")
+      .insert(orderItems);
+
+    if (itemError) {
+      return res.status(500).json(itemError);
+    }
+
+    res.json({
+      success: true,
+      order_id: order.id
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
+});
+
 app.listen(process.env.PORT || 5000, () => {
   console.log("Server running");
 });
