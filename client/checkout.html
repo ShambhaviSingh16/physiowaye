@@ -1,15 +1,158 @@
-<section class="product-details">
+<!DOCTYPE html>
+<html lang="en">
 
-<div class="product-card">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout | PhysioWaye</title>
 
-<h1>Checkout</h1>
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+.checkout-wrapper{
+    max-width:900px;
+    margin:80px auto;
+    padding:20px;
+}
+
+.checkout-card{
+    background:#fff;
+    border-radius:24px;
+    padding:40px;
+    box-shadow:0 20px 50px rgba(0,0,0,.08);
+    animation:fadeUp .5s ease;
+}
+
+.checkout-title{
+    font-size:2rem;
+    color:#1F2A44;
+    margin-bottom:25px;
+}
+
+.order-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:15px 0;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.order-item:last-child{
+    border:none;
+}
+
+.order-name{
+    font-weight:600;
+    color:#1F2A44;
+}
+
+.order-qty{
+    color:#64748b;
+}
+
+.summary-box{
+    margin-top:25px;
+    padding:20px;
+    border-radius:16px;
+    background:#f8fbff;
+}
+
+.summary-box h3{
+    color:#2e91d1;
+}
+
+.checkout-form{
+    margin-top:30px;
+}
+
+.checkout-form input,
+.checkout-form textarea{
+    width:100%;
+    padding:14px 16px;
+    margin-bottom:15px;
+    border:1px solid #dbe4ee;
+    border-radius:12px;
+    font-size:15px;
+}
+
+.checkout-form input:focus,
+.checkout-form textarea:focus{
+    outline:none;
+    border-color:#2e91d1;
+}
+
+.checkout-form textarea{
+    resize:none;
+    height:120px;
+}
+
+.place-order-btn{
+    width:100%;
+    margin-top:10px;
+}
+
+.empty-checkout{
+    text-align:center;
+    padding:50px 20px;
+}
+
+.empty-checkout h2{
+    margin-bottom:10px;
+}
+
+@media(max-width:768px){
+
+.checkout-card{
+padding:25px;
+}
+
+.checkout-title{
+font-size:1.7rem;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<section class="checkout-wrapper">
+
+<div class="checkout-card">
+
+<h1 class="checkout-title">
+Checkout
+</h1>
 
 <div id="orderSummary"></div>
 
-<button onclick="placeOrder()" class="btn-primary">
+<div class="checkout-form">
+
+<input type="text" id="name" placeholder="Full Name">
+
+<input type="email" id="email" placeholder="Email Address">
+
+<input type="tel" id="phone" placeholder="Phone Number">
+
+<textarea id="address" placeholder="Delivery Address"></textarea>
+
+</div>
+
+<button
+onclick="placeOrder()"
+class="btn-primary place-order-btn">
 Place Order
 </button>
 
 </div>
 
 </section>
+
+<script src="js/checkout.js"></script>
+
+</body>
+</html>

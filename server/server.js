@@ -360,6 +360,38 @@ app.post("/api/orders", async (req, res) => {
 
 });
 
+app.get("/api/orders/:userId", async (req, res) => {
+
+  try {
+
+    const { data, error } =
+      await supabase
+      .from("orders")
+      .select("*")
+      .eq(
+        "user_id",
+        req.params.userId
+      )
+      .order(
+        "created_at",
+        { ascending: false }
+      );
+
+    if (error)
+      return res.status(500)
+      .json(error);
+
+    res.json(data);
+
+  } catch(err) {
+
+    res.status(500)
+    .json(err);
+
+  }
+
+});
+
 app.listen(process.env.PORT || 5000, () => {
   console.log("Server running");
 });

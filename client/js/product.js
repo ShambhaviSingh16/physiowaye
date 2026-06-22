@@ -66,6 +66,22 @@ onclick="addToCart(${product.id})">
 Add To Cart
 
 </button>
+<p class="stock-status">
+
+✓ In Stock
+
+</p>
+<div class="trust-badges">
+
+<span>✓ Secure Payment</span>
+
+<span>✓ Genuine Products</span>
+
+<span>✓ Fast Delivery</span>
+
+<span>✓ GST Invoice</span>
+
+</div>
 
 </div>
 
@@ -108,7 +124,7 @@ try {
     );
   }
 
-  alert("Product added to cart");
+showToast("✓ Product added to cart");
 
   updateCartCount();
 

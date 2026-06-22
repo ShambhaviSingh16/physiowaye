@@ -20,8 +20,29 @@ async function loadCart() {
 
   if (!cart.length) {
 
-    cartItemsDiv.innerHTML =
-      "<p>Your cart is empty.</p>";
+    cartItemsDiv.innerHTML = `
+
+<div class="empty-cart">
+
+<h2>🛒</h2>
+
+<h3>Your Cart Is Empty</h3>
+
+<p>
+Browse our physiotherapy products
+and add items to your cart.
+</p>
+
+<a href="products.html"
+class="btn-primary">
+
+Browse Products
+
+</a>
+
+</div>
+
+`;
 
     totalDiv.innerText = "";
 
@@ -42,45 +63,58 @@ async function loadCart() {
 
     total += itemTotal;
 
-    cartItemsDiv.innerHTML += `
+   cartItemsDiv.innerHTML += `
 
 <div class="cart-item">
 
-<strong>
-${product.product_name}
-</strong>
+  <div class="cart-image">
+    <img
+      src="${
+        product.image_url ||
+        "https://placehold.co/150x150"
+      }"
+      alt="${product.product_name}">
+  </div>
 
-<div class="cart-controls">
+  <div class="cart-info">
 
-<button
-onclick="changeQty(${item.id}, ${item.quantity}, -1)">
-−
-</button>
+    <h3>${product.product_name}</h3>
 
-<span>${item.quantity}</span>
+    <p class="price">
+      ₹${product.selling_price}
+    </p>
 
-<button
-onclick="changeQty(${item.id}, ${item.quantity}, 1)">
-+
-</button>
+    <div class="cart-controls">
 
-<button
-class="remove-btn"
-onclick="removeItem(${item.id})">
-Remove
-</button>
+      <button
+      onclick="changeQty(${item.id}, ${item.quantity}, -1)">
+      −
+      </button>
 
-</div>
+      <span>${item.quantity}</span>
 
-<p>
-₹${product.selling_price}
-×
-${item.quantity}
-=
-₹${itemTotal}
-</p>
+      <button
+      onclick="changeQty(${item.id}, ${item.quantity}, 1)">
+      +
+      </button>
 
-<hr>
+      <button
+      class="remove-btn"
+      onclick="removeItem(${item.id})">
+      Remove
+      </button>
+
+    </div>
+
+    <p>
+      ₹${product.selling_price}
+      ×
+      ${item.quantity}
+      =
+      ₹${itemTotal}
+    </p>
+
+  </div>
 
 </div>
 
