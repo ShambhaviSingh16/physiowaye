@@ -149,14 +149,20 @@ app.post("/api/cart", async (req, res) => {
 
   try {
 
+    console.log("CART REQUEST:", req.body);
+
     const { user_id, product_id, quantity } = req.body;
 
-    const { data: existing } = await supabase
-      .from("cart")
-      .select("*")
-      .eq("user_id", user_id)
-      .eq("product_id", product_id)
-      .single();
+    const { data: existing, error: existingError } =
+      await supabase
+        .from("cart")
+        .select("*")
+        .eq("user_id", user_id)
+        .eq("product_id", product_id)
+        .maybeSingle();
+
+    console.log("EXISTING:", existing);
+    console.log("EXISTING ERROR:", existingError);
 
     if (existing) {
 
@@ -168,6 +174,7 @@ app.post("/api/cart", async (req, res) => {
         .eq("id", existing.id);
 
       if (error) {
+        console.log("UPDATE ERROR:", error);
         return res.status(500).json(error);
       }
 
@@ -176,7 +183,7 @@ app.post("/api/cart", async (req, res) => {
       });
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("cart")
       .insert([
         {
@@ -184,7 +191,11 @@ app.post("/api/cart", async (req, res) => {
           product_id,
           quantity
         }
-      ]);
+      ])
+      .select();
+
+    console.log("INSERT DATA:", data);
+    console.log("INSERT ERROR:", error);
 
     if (error) {
       return res.status(500).json(error);
@@ -195,6 +206,8 @@ app.post("/api/cart", async (req, res) => {
     });
 
   } catch (err) {
+
+    console.log("CATCH ERROR:", err);
 
     res.status(500).json(err);
 
