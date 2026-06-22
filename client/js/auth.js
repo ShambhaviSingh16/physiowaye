@@ -181,7 +181,7 @@ document.addEventListener(
   }
 );
 
-function updateCartCount() {
+async function updateCartCount() {
 
   const user =
     JSON.parse(
@@ -190,22 +190,35 @@ function updateCartCount() {
 
   if (!user) return;
 
-  const cart =
-    JSON.parse(
-      localStorage.getItem(
-        "cart_" + user.id
-      )
-    ) || [];
+  try {
 
-  let total = 0;
+    const res = await fetch(
+      `https://physiowaye.onrender.com/api/cart/${user.id}`
+    );
 
-  cart.forEach(i => total += i.qty);
+    const cart = await res.json();
 
-  const badge =
-    document.getElementById("cartCount");
+    let total = 0;
 
-  if (badge)
-    badge.innerText = total;
+    cart.forEach(item => {
+      total += item.quantity;
+    });
+
+    const badge =
+      document.getElementById("cartCount");
+
+    if (badge) {
+      badge.innerText = total;
+    }
+
+  } catch (err) {
+
+    console.error(
+      "Cart Count Error:",
+      err
+    );
+
+  }
 
 }
 

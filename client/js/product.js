@@ -73,27 +73,6 @@ Add To Cart
 `;
 });
 
-// function addToCart(id) {
-
-//   const user = JSON.parse(sessionStorage.getItem("user"));
-
-//   if (!user) {
-//     window.location.href = "login.html";
-//     return;
-//   }
-
-//   const cartKey = `cart_${user.id}`;
-// let cart = JSON.parse(localStorage.getItem("cart_"+user.id)) || [];
-
-//   const existing = cart.find(i => i.id === id);
-
-//   if (existing) existing.qty++;
-//   else cart.push({ id, qty: 1 });
-
-// localStorage.setItem("cart_"+user.id, JSON.stringify(cart));
-
-//   alert("Product added to cart");
-// }
 async function addToCart(id) {
 
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -103,56 +82,43 @@ async function addToCart(id) {
     return;
   }
 
-  try {
+try {
 
-    const response = await fetch(
-      "https://physiowaye.onrender.com/api/cart",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          user_id: user.id,
-          product_id: id,
-          quantity: 1
-        })
-      }
-    );
-
-    const result = await response.json();
-
-    console.log(result);
-
-  } catch (err) {
-
-    console.error("Cart API Error:", err);
-
-  }
-
-  // LOCAL BACKUP
-
-  let cart =
-    JSON.parse(
-      localStorage.getItem("cart_" + user.id)
-    ) || [];
-
-  const existing = cart.find(i => i.id === id);
-
-  if (existing) {
-    existing.qty++;
-  } else {
-    cart.push({
-      id,
-      qty: 1
-    });
-  }
-
-  localStorage.setItem(
-    "cart_" + user.id,
-    JSON.stringify(cart)
+  const response = await fetch(
+    "https://physiowaye.onrender.com/api/cart",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        user_id: user.id,
+        product_id: id,
+        quantity: 1
+      })
+    }
   );
 
+  const result =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Cart error"
+    );
+  }
+
   alert("Product added to cart");
+
+  updateCartCount();
+
+} catch (err) {
+
+  console.error(
+    "Cart API Error:",
+    err
+  );
+
+}
 
 }
