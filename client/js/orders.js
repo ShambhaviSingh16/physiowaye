@@ -1,3 +1,5 @@
+console.log("Orders JS Loaded");
+
 const user =
 JSON.parse(
 sessionStorage.getItem("user")
@@ -9,7 +11,8 @@ document.getElementById(
 );
 
 async function loadOrders() {
-
+console.log("USER:", user);
+console.log("FETCHING ORDERS...");
   const res =
   await fetch(
     `https://physiowaye.onrender.com/api/orders/${user.id}`

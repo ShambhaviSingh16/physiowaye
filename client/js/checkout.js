@@ -211,7 +211,7 @@ window.placeOrder = async function () {
 function showOrderSuccess(orderId) {
 
     document.getElementById("orderMessage").textContent =
-        `Your order #${orderId} has been placed successfully.`;
+        `🎉 Your order has been placed successfully.`;
 
     document.getElementById("successModal").style.display = "flex";
 }
