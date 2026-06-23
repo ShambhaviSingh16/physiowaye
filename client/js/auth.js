@@ -160,6 +160,9 @@ document.addEventListener(
     const ordersBtn =
       document.getElementById("ordersBtn");
 
+    const profileBtn =
+      document.getElementById("profileBtn");
+
     if (session) {
 
       sessionStorage.setItem(
@@ -171,6 +174,7 @@ document.addEventListener(
       logoutBtn?.classList.remove("hidden");
       cartBtn?.classList.remove("hidden");
       ordersBtn?.classList.remove("hidden");
+      profileBtn?.classList.remove("hidden");
 
     } else {
 
@@ -178,7 +182,7 @@ document.addEventListener(
       logoutBtn?.classList.add("hidden");
       cartBtn?.classList.add("hidden");
       ordersBtn?.classList.add("hidden");
-
+      profileBtn?.classList.add("hidden");
     }
 
     updateCartCount();
