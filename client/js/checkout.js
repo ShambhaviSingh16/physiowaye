@@ -191,12 +191,10 @@ window.placeOrder = async function () {
 
     }
 
-    alert(
-      `🎉 Order #${result.order_id} placed successfully!`
-    );
+   showOrderSuccess(result.order_id);
 
-    window.location.href =
-      "orders.html";
+    // window.location.href =
+    //   "orders.html";
 
   } catch (err) {
 
@@ -209,3 +207,16 @@ window.placeOrder = async function () {
   }
 
 };
+
+function showOrderSuccess(orderId) {
+
+    document.getElementById("orderMessage").textContent =
+        `Your order #${orderId} has been placed successfully.`;
+
+    document.getElementById("successModal").style.display = "flex";
+}
+
+function goToOrders() {
+
+    window.location.href = "orders.html";
+}

@@ -1513,3 +1513,76 @@ font-weight:600;
 margin-top:15px;
 
 }
+
+.success-modal {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0,0,0,0.45);
+
+  display: none;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+}
+
+.success-box {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+
+  text-align: center;
+
+  width: 400px;
+
+  animation: popup .3s ease;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+
+  margin: auto;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+  color: white;
+
+  font-size: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.success-box h2 {
+  margin-top: 20px;
+}
+
+.success-box button {
+  margin-top: 20px;
+
+  border: none;
+  padding: 12px 24px;
+
+  border-radius: 8px;
+
+  background: #3ba7e0;
+  color: white;
+
+  cursor: pointer;
+}
+
+@keyframes popup {
+  from {
+    transform: scale(.85);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
