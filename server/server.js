@@ -4,9 +4,15 @@ const supabase = require("./supabase");
 const express = require("express");
 // const mysql = require("mysql2");
 const cors = require("cors");
+const Razorpay = require("razorpay");
 
 
 const app = express();
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 app.use(cors());
 app.use(express.json());
@@ -229,6 +235,34 @@ app.put("/api/cart/:cartId", async (req, res) => {
 
 });
 
+app.post("/api/create-razorpay-order", async (req, res) => {
+
+  try {
+
+    const { amount } = req.body;
+
+    const options = {
+      amount: amount * 100,
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json(order);
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
+});
+
 /* ---------- CREATE ORDER ---------- */
 
 app.post("/api/orders", async (req, res) => {
@@ -289,27 +323,27 @@ app.get("/api/orders/:userId", async (req, res) => {
 
     const { data, error } =
       await supabase
-      .from("orders")
-      .select("*")
-      .eq(
-        "user_id",
-        req.params.userId
-      )
-      .order(
-        "created_at",
-        { ascending: false }
-      );
+        .from("orders")
+        .select("*")
+        .eq(
+          "user_id",
+          req.params.userId
+        )
+        .order(
+          "created_at",
+          { ascending: false }
+        );
 
     if (error)
       return res.status(500)
-      .json(error);
+        .json(error);
 
     res.json(data);
 
-  } catch(err) {
+  } catch (err) {
 
     res.status(500)
-    .json(err);
+      .json(err);
 
   }
 
