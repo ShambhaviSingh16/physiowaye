@@ -157,6 +157,9 @@ document.addEventListener(
     const cartBtn =
       document.getElementById("cartBtn");
 
+    const ordersBtn =
+      document.getElementById("ordersBtn");
+
     if (session) {
 
       sessionStorage.setItem(
@@ -167,12 +170,14 @@ document.addEventListener(
       loginBtn?.classList.add("hidden");
       logoutBtn?.classList.remove("hidden");
       cartBtn?.classList.remove("hidden");
+      ordersBtn?.classList.remove("hidden");
 
     } else {
 
       loginBtn?.classList.remove("hidden");
       logoutBtn?.classList.add("hidden");
       cartBtn?.classList.add("hidden");
+      ordersBtn?.classList.add("hidden");
 
     }
 
@@ -243,7 +248,7 @@ document
   );
 
 
-  function showToast(message) {
+function showToast(message) {
 
   const toast =
     document.createElement("div");

@@ -1,67 +1,71 @@
 console.log("Orders JS Loaded");
 
 const user =
-JSON.parse(
-sessionStorage.getItem("user")
-);
+    JSON.parse(
+        sessionStorage.getItem("user")
+    );
 
 const list =
-document.getElementById(
-"ordersList"
-);
+    document.getElementById(
+        "ordersList"
+    );
 
 async function loadOrders() {
-console.log("USER:", user);
-console.log("FETCHING ORDERS...");
-  const res =
-  await fetch(
-    `https://physiowaye.onrender.com/api/orders/${user.id}`
-  );
+    console.log("USER:", user);
+    console.log("FETCHING ORDERS...");
+    const res =
+        await fetch(
+            `https://physiowaye.onrender.com/api/orders/${user.id}`
+        );
 
-  const orders =
-  await res.json();
+    const orders =
+        await res.json();
 
-  if(!orders.length){
+    if (!orders.length) {
 
-    list.innerHTML = `
+        list.innerHTML = `
       <div class="empty-orders">
         <h2>No Orders Yet</h2>
       </div>
     `;
 
-    return;
-  }
+        return;
+    }
 
-  list.innerHTML = "";
+    list.innerHTML = "";
 
-  orders.forEach(order => {
+    orders.forEach(order => {
 
-    list.innerHTML += `
-      <div class="order-card">
+list.innerHTML += `
+<div class="order-card">
 
-        <h3>
-          Order #${order.id}
-        </h3>
+    <div class="order-header">
+        <h3>Order</h3>
 
-        <p>
-          Status:
-          ${order.status}
-        </p>
+        <span class="status-badge">
+            ${order.status}
+        </span>
+    </div>
 
-        <p>
-          Total:
-          ₹${order.total_amount}
-        </p>
+    <p>
+        Order ID:
+        #${order.id}
+    </p>
 
-        <p>
-          ${new Date(
-            order.created_at
-          ).toLocaleString()}
-        </p>
+    <p>
+        Total:
+        ₹${order.total_amount}
+    </p>
 
-      </div>
-    `;
-  });
+    <p>
+        Placed:
+        ${new Date(order.created_at)
+          .toLocaleString()}
+    </p>
+
+</div>
+`;
+    });
 
 }
 
