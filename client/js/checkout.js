@@ -5,92 +5,86 @@ if (!user) {
     window.location.href = "login.html";
 }
 
-
-
 const summary =
-document.getElementById("orderSummary");
-
-let totalItems = 0;
-
-
+    document.getElementById("orderSummary");
 
 async function renderSummary() {
 
-  try {
+    try {
 
-    const res = await fetch(
-      `https://physiowaye.onrender.com/api/cart/${user.id}`
-    );
+        const res = await fetch(
+            `https://physiowaye.onrender.com/api/cart/${user.id}`
+        );
 
-    const cart = await res.json();
+        const cart = await res.json();
 
-    if (!cart.length) {
+        if (!cart.length) {
 
-      summary.innerHTML = `
-        <div class="empty-checkout">
-          <h2>Your Cart is Empty</h2>
-          <p>Add products before checkout.</p>
+            summary.innerHTML = `
+            <div class="empty-checkout">
+                <h2>Your Cart is Empty</h2>
+                <p>Add products before checkout.</p>
+            </div>
+            `;
+
+            document.querySelector(
+                ".place-order-btn"
+            ).style.display = "none";
+
+            return;
+        }
+
+        let totalItems = 0;
+        let totalPrice = 0;
+
+        let html = "";
+
+        cart.forEach(item => {
+
+            totalItems += item.quantity;
+
+            totalPrice +=
+                item.products.selling_price *
+                item.quantity;
+
+            html += `
+            <div class="order-item">
+
+                <div>
+
+                    <div class="order-name">
+                        ${item.products.product_name}
+                    </div>
+
+                    <div class="order-qty">
+                        Quantity: ${item.quantity}
+                    </div>
+
+                </div>
+
+                <div>
+                    ₹${item.products.selling_price * item.quantity}
+                </div>
+
+            </div>
+            `;
+
+        });
+
+        html += `
+        <div class="summary-box">
+            <h3>Total Items: ${totalItems}</h3>
+            <h3>Total Amount: ₹${totalPrice}</h3>
         </div>
-      `;
+        `;
 
-      document.querySelector(
-        ".place-order-btn"
-      ).style.display = "none";
+        summary.innerHTML = html;
 
-      return;
+    } catch (err) {
+
+        console.error(err);
+
     }
-
-    let totalItems = 0;
-    let totalPrice = 0;
-
-    let html = "";
-
-    cart.forEach(item => {
-
-      totalItems += item.quantity;
-
-      totalPrice +=
-        item.products.selling_price *
-        item.quantity;
-
-      html += `
-        <div class="order-item">
-
-          <div>
-
-            <div class="order-name">
-              ${item.products.product_name}
-            </div>
-
-            <div class="order-qty">
-              Quantity: ${item.quantity}
-            </div>
-
-          </div>
-
-          <div>
-            ₹${item.products.selling_price * item.quantity}
-          </div>
-
-        </div>
-      `;
-
-    });
-
-    html += `
-      <div class="summary-box">
-        <h3>Total Items: ${totalItems}</h3>
-        <h3>Total Amount: ₹${totalPrice}</h3>
-      </div>
-    `;
-
-    summary.innerHTML = html;
-
-  } catch(err) {
-
-    console.error(err);
-
-  }
 
 }
 
@@ -98,125 +92,176 @@ renderSummary();
 
 window.placeOrder = async function () {
 
-  const name =
-    document.getElementById("name").value.trim();
+    const name =
+        document.getElementById("name").value.trim();
 
-  const email =
-    document.getElementById("email").value.trim();
+    const email =
+        document.getElementById("email").value.trim();
 
-  const phone =
-    document.getElementById("phone").value.trim();
+    const phone =
+        document.getElementById("phone").value.trim();
 
-  const address =
-    document.getElementById("address").value.trim();
+    const address =
+        document.getElementById("address").value.trim();
 
-  if (!name || !email || !phone || !address) {
+    if (!name || !email || !phone || !address) {
 
-    alert("Please fill all details");
+        alert("Please fill all details");
 
-    return;
-  }
-
-  try {
-
-    const cartRes = await fetch(
-      `https://physiowaye.onrender.com/api/cart/${user.id}`
-    );
-
-    const cartItems = await cartRes.json();
-
-    if (!cartItems.length) {
-
-      alert("Cart is empty");
-
-      return;
+        return;
     }
 
-    let total = 0;
+    try {
 
-    const items = cartItems.map(item => {
+        // Fetch cart
 
-      total +=
-        item.products.selling_price *
-        item.quantity;
+        const cartRes = await fetch(
+            `https://physiowaye.onrender.com/api/cart/${user.id}`
+        );
 
-      return {
-        id: item.products.id,
-        qty: item.quantity,
-        price: item.products.selling_price
-      };
+        const cart = await cartRes.json();
 
-    });
+        let total = 0;
 
-    const orderRes = await fetch(
-      "https://physiowaye.onrender.com/api/orders",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-          "application/json"
-        },
-        body: JSON.stringify({
-          user_id: user.id,
-          items,
-          total_amount: total,
-          customer: {
-            name,
-            email,
-            phone,
-            address
-          }
-        })
-      }
-    );
+        const items = cart.map(item => {
 
-    const result =
-      await orderRes.json();
+            total +=
+                item.products.selling_price *
+                item.quantity;
 
-    if (!result.success) {
+            return {
+                id: item.products.id,
+                qty: item.quantity,
+                price: item.products.selling_price
+            };
 
-      alert("Order failed");
+        });
 
-      return;
+        // Create Razorpay Order
+
+        const razorpayRes = await fetch(
+            "https://physiowaye.onrender.com/api/create-razorpay-order",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify({
+                    amount: total
+                })
+            }
+        );
+
+        const razorpayOrder =
+            await razorpayRes.json();
+
+        const options = {
+
+            key: "rzp_test_T51j3XaiQx5sos",
+
+            amount: razorpayOrder.amount,
+
+            currency: "INR",
+
+            name: "PhysioWaye",
+
+            description: "Order Payment",
+
+            order_id: razorpayOrder.id,
+
+            handler: async function (response) {
+
+                const orderRes = await fetch(
+                    "https://physiowaye.onrender.com/api/orders",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            user_id: user.id,
+                            items,
+                            total_amount: total
+                        })
+                    }
+                );
+
+                const result =
+                    await orderRes.json();
+
+                if (!result.success) {
+
+                    alert("Order failed");
+
+                    return;
+                }
+
+                // Clear cart
+
+                for (const item of cart) {
+
+                    await fetch(
+                        `https://physiowaye.onrender.com/api/cart/${item.id}`,
+                        {
+                            method: "DELETE"
+                        }
+                    );
+
+                }
+
+                showOrderSuccess(
+                    result.order_id
+                );
+
+            },
+
+            prefill: {
+                name,
+                email,
+                contact: phone
+            },
+
+            theme: {
+                color: "#0077b6"
+            }
+
+        };
+
+        const rzp =
+            new Razorpay(options);
+
+        rzp.open();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert(
+            "Something went wrong"
+        );
+
     }
-
-    for (const item of cartItems) {
-
-      await fetch(
-        `https://physiowaye.onrender.com/api/cart/${item.id}`,
-        {
-          method: "DELETE"
-        }
-      );
-
-    }
-
-   showOrderSuccess(result.order_id);
-
-    // window.location.href =
-    //   "orders.html";
-
-  } catch (err) {
-
-    console.error(err);
-
-    alert(
-      "Something went wrong"
-    );
-
-  }
 
 };
 
 function showOrderSuccess(orderId) {
 
-    document.getElementById("orderMessage").textContent =
+    document.getElementById(
+        "orderMessage"
+    ).textContent =
         `🎉 Your order has been placed successfully.`;
 
-    document.getElementById("successModal").style.display = "flex";
+    document.getElementById(
+        "successModal"
+    ).style.display = "flex";
+
 }
 
 function goToOrders() {
 
-    window.location.href = "orders.html";
+    window.location.href =
+        "orders.html";
+
 }
