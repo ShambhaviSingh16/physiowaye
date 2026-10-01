@@ -12,9 +12,7 @@ async function loadCart() {
   const userObj =
     JSON.parse(sessionStorage.getItem("user"));
 
-  const res = await fetch(
-    `https://physiowaye.onrender.com/api/cart/${userObj.id}`
-  );
+  const res = await apiFetch(`/cart/${userObj.id}`);
 
   const cart = await res.json();
 
@@ -71,7 +69,7 @@ Browse Products
     <img
       src="${
         product.image_url ||
-        "https://placehold.co/150x150"
+        `assets/images/products/${String(product.sku || "").toLowerCase()}.jpg`
       }"
       alt="${product.product_name}">
   </div>
@@ -135,8 +133,8 @@ async function changeQty(cartId, currentQty, change) {
 
   if (newQty <= 0) {
 
-    await fetch(
-      `https://physiowaye.onrender.com/api/cart/${cartId}`,
+    await apiFetch(
+      `/cart/${cartId}`,
       {
         method: "DELETE"
       }
@@ -144,8 +142,8 @@ async function changeQty(cartId, currentQty, change) {
 
   } else {
 
-    await fetch(
-      `https://physiowaye.onrender.com/api/cart/${cartId}`,
+    await apiFetch(
+      `/cart/${cartId}`,
       {
         method: "PUT",
         headers: {
@@ -165,8 +163,8 @@ async function changeQty(cartId, currentQty, change) {
 
 async function removeItem(cartId) {
 
-  await fetch(
-    `https://physiowaye.onrender.com/api/cart/${cartId}`,
+  await apiFetch(
+    `/cart/${cartId}`,
     {
       method: "DELETE"
     }

@@ -36,6 +36,8 @@ async function login() {
     JSON.stringify(data.user)
   );
 
+  if (await completePendingPurchase()) return;
+
   window.location.href = "products.html";
 }
 
@@ -96,8 +98,7 @@ async function googleLogin() {
   await supabaseClient.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo:
-        "https://physiowaye.com/products.html"
+      redirectTo: new URL("login.html", window.location.href).href
     }
   });
 
@@ -176,6 +177,8 @@ document.addEventListener(
       ordersBtn?.classList.remove("hidden");
       profileBtn?.classList.remove("hidden");
 
+      if (await completePendingPurchase()) return;
+
     } else {
 
       loginBtn?.classList.remove("hidden");
@@ -190,6 +193,51 @@ document.addEventListener(
   }
 );
 
+async function completePendingPurchase() {
+  const savedAction = sessionStorage.getItem("physiowaye_pending_purchase");
+  if (!savedAction) return false;
+
+  let pending;
+  try {
+    pending = JSON.parse(savedAction);
+  } catch {
+    sessionStorage.removeItem("physiowaye_pending_purchase");
+    return false;
+  }
+
+  const productId = String(pending.productId || "");
+  if (!/^[\w-]+$/.test(productId)) {
+    sessionStorage.removeItem("physiowaye_pending_purchase");
+    return false;
+  }
+
+  sessionStorage.removeItem("physiowaye_pending_purchase");
+  if (pending.action === "buyNow") {
+    window.location.replace(`checkout.html?buyNow=${encodeURIComponent(productId)}`);
+    return true;
+  }
+
+  if (pending.action === "add") {
+    try {
+      const response = await apiFetch("/cart", {
+        method: "POST",
+        body: JSON.stringify({ product_id: productId, quantity: 1 })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Could not add this item");
+      window.location.replace("cart.html");
+      return true;
+    } catch (error) {
+      console.error("Pending cart action failed:", error);
+      const loginError = document.getElementById("loginError");
+      if (loginError) loginError.textContent = "You’re signed in, but we couldn’t add that item. Please try again from the product page.";
+      return true;
+    }
+  }
+
+  return false;
+}
+
 async function updateCartCount() {
 
   const user =
@@ -201,9 +249,7 @@ async function updateCartCount() {
 
   try {
 
-    const res = await fetch(
-      `https://physiowaye.onrender.com/api/cart/${user.id}`
-    );
+    const res = await apiFetch(`/cart/${user.id}`);
 
     const cart = await res.json();
 

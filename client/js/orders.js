@@ -1,72 +1,68 @@
-console.log("Orders JS Loaded");
+const list = document.getElementById("ordersList");
+const ordersStatus = document.getElementById("ordersStatus");
+const currency = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 0
+});
 
-const user =
-    JSON.parse(
-        sessionStorage.getItem("user")
-    );
+function renderOrder(order) {
+  const card = document.createElement("article");
+  card.className = "order-card";
 
-const list =
-    document.getElementById(
-        "ordersList"
-    );
+  const top = document.createElement("div");
+  top.className = "order-card-top";
+  const title = document.createElement("h2");
+  title.textContent = `Order #${order.id}`;
+  const status = document.createElement("span");
+  status.className = `status-pill status-${String(order.status || "pending").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  status.textContent = order.status || "Pending";
+  top.append(title, status);
+
+  const date = document.createElement("p");
+  date.className = "order-date";
+  const parsedDate = new Date(order.created_at);
+  date.textContent = Number.isNaN(parsedDate.getTime())
+    ? "Date unavailable"
+    : `Placed ${parsedDate.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}`;
+
+  const total = document.createElement("p");
+  total.className = "order-total";
+  total.textContent = currency.format(Number(order.total_amount) || 0);
+
+  card.append(top, date, total);
+  return card;
+}
 
 async function loadOrders() {
-    console.log("USER:", user);
-    console.log("FETCHING ORDERS...");
-    const res =
-        await fetch(
-            `https://physiowaye.onrender.com/api/orders/${user.id}`
-        );
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    window.location.href = "login.html";
+    return;
+  }
 
-    const orders =
-        await res.json();
+  try {
+    const response = await apiFetch(`/orders/${encodeURIComponent(session.user.id)}`);
+    if (!response.ok) throw new Error("Order request failed");
+    const orders = await response.json();
+    list.replaceChildren();
 
-    if (!orders.length) {
-
-        list.innerHTML = `
-      <div class="empty-orders">
-        <h2>No Orders Yet</h2>
-      </div>
-    `;
-
-        return;
+    if (!Array.isArray(orders) || orders.length === 0) {
+      ordersStatus.textContent = "You haven’t placed an order yet.";
+      const link = document.createElement("a");
+      link.href = "products.html";
+      link.className = "btn-primary";
+      link.textContent = "Explore products";
+      list.append(link);
+      return;
     }
 
-    list.innerHTML = "";
-
-    orders.forEach(order => {
-
-list.innerHTML += `
-<div class="order-card">
-
-    <div class="order-header">
-        <h3>Order</h3>
-
-        <span class="status-badge">
-            ${order.status}
-        </span>
-    </div>
-
-    <p>
-        Order ID:
-        #${order.id}
-    </p>
-
-    <p>
-        Total:
-        ₹${order.total_amount}
-    </p>
-
-    <p>
-        Placed:
-        ${new Date(order.created_at)
-          .toLocaleString()}
-    </p>
-
-</div>
-`;
-    });
-
+    ordersStatus.textContent = `${orders.length} ${orders.length === 1 ? "order" : "orders"}`;
+    orders.forEach(order => list.append(renderOrder(order)));
+  } catch (error) {
+    console.error("Unable to load orders:", error);
+    ordersStatus.textContent = "We couldn’t load your orders. Please refresh and try again.";
+  }
 }
 
 loadOrders();

@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PhysioWaye | Physiotherapy Equipment</title>
 
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/style.css?v=frontend-8">
+  <link rel="stylesheet" href="css/responsive.css?v=frontend-8">
 </head>
 <body>
 
@@ -21,8 +21,8 @@
   <nav class="nav-links" id="navLinks">
   <a href="index.html">Home</a>
   <a href="products.html">Products</a>
-  <!-- <a href="about.html">About</a>
-  <a href="contact.html">Contact</a> -->
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
 
   <!-- Login -->
   <a href="login.html" id="loginBtn" class="login-btn">Login</a>
@@ -30,7 +30,7 @@
   
   <!-- Cart (hidden by default) -->
   <a href="cart.html" id="cartBtn" class="cart-btn hidden">
-    🛒 Cart <span id="cartCount" class="cart-count">0</span>
+    ðŸ›’ Cart <span id="cartCount" class="cart-count">0</span>
   </a>
 <a href="orders.html"
    id="ordersBtn"
@@ -57,119 +57,88 @@
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content glass">
-      <h1>Premium Physiotherapy Equipment</h1>
-      <p>Trusted machines for recovery, rehabilitation, and performance.</p>
-      <a href="products.html" class="btn-primary">Explore Products</a>
-    </div>
-  </section>
-
-  <!-- <section class="stats">
-
-<div>
-
-<h2>500+</h2>
-
-<p>Products</p>
-
-</div>
-
-<div>
-
-<h2>1000+</h2>
-
-<p>Customers</p>
-
-</div>
-
-<div>
-
-<h2>50+</h2>
-
-<p>Clinics Served</p>
-
-</div>
-
-</section> -->
-
-<!-- <section class="testimonials">
-
-<h2>
-What Our Customers Say
-</h2>
-
-<div class="testimonial-card">
-
-★★★★★
-
-<p>
-
-Excellent quality equipment.
-Very satisfied.
-
-</p>
-
-<h4>
-Dr. Sharma
-</h4>
-
-</div>
-
-</section> -->
-
-  <!-- Features -->
-  <section class="features">
-    <div class="feature-card">
-      <h3>Medical Grade</h3>
-      <p>High-quality equipment trusted by professionals.</p>
-    </div>
-    <div class="feature-card">
-      <h3>In-Store & Online</h3>
-      <p>Visit us physically or order online with ease.</p>
-    </div>
-    <div class="feature-card">
-      <h3>Secure Ordering</h3>
-      <p>Safe checkout and reliable service.</p>
-    </div>
-  </section>
+  <main class="home-landing">
+    <section class="home-hero">
+      <div class="home-hero-copy">
+        <span class="eyebrow">PHYSIOTHERAPY EQUIPMENT, MADE EASIER TO FIND</span>
+        <h1>Build a better space for recovery.</h1>
+        <p>Explore practical therapy and rehabilitation equipment for clinics, practitioners, and care at home—with clear product details and a real team to contact.</p>
+        <form class="home-search" action="products.html" method="get" role="search">
+          <label class="visually-hidden" for="homeProductSearch">Search equipment</label>
+          <input id="homeProductSearch" name="search" type="search" placeholder="What equipment are you looking for?">
+          <button type="submit">Search <span aria-hidden="true">→</span></button>
+        </form>
+        <div class="home-hero-links"><a href="products.html">Browse all equipment <span aria-hidden="true">↗</span></a><a href="contact.html">Need help choosing?</a></div>
+      </div>
+      <div class="home-hero-image">
+        <img src="assets/images/home/clinic-hero.jpg" alt="A physiotherapist consulting with a patient in a bright rehabilitation clinic" fetchpriority="high">
+        <div class="home-image-note"><span>CARE, WITH THE RIGHT TOOLS</span><strong>From clinic rooms to home routines</strong></div>
+        <span class="home-image-index" aria-hidden="true">PHYSIOWAYE / CARE</span>
+      </div>
+    </section>
+    <section class="home-categories" aria-label="Shop by need">
+      <a href="products.html?search=therapy"><span>01</span><strong>Therapy equipment</strong><span aria-hidden="true">↗</span></a>
+      <a href="products.html?search=rehabilitation"><span>02</span><strong>Rehabilitation</strong><span aria-hidden="true">↗</span></a>
+      <a href="products.html?search=portable"><span>03</span><strong>Portable devices</strong><span aria-hidden="true">↗</span></a>
+    </section>
+    <section class="home-featured">
+      <div class="home-featured-heading"><div><span class="eyebrow">A PLACE TO START</span><h2>Explore the equipment</h2><p>Take a closer look at some of the products in our store.</p></div><a href="products.html">View all products <span aria-hidden="true">→</span></a></div>
+      <div class="home-featured-grid" id="homeFeaturedProducts" aria-live="polite"><p class="home-loading">Finding products for you…</p></div>
+    </section>
+    <section class="home-service-strip">
+      <div><span class="eyebrow">A CLEARER WAY TO SHOP</span><h2>Know what you’re choosing.</h2></div>
+      <p>Compare product information, check availability, and ask our team when you want a little more guidance.</p>
+      <a class="btn-primary" href="contact.html">Talk to our team <span aria-hidden="true">↗</span></a>
+    </section>
+  </main>
 
   <!-- Footer -->
   <footer class="site-footer">
-  <div class="footer-container">
+  <div class="footer-shell">
+    <section class="footer-cta" aria-labelledby="footerCtaTitle">
+      <div class="footer-cta-copy">
+        <span class="footer-kicker">A PERSON TO ASK</span>
+        <h2 id="footerCtaTitle">Finding the right equipment?</h2>
+        <p>Tell us what you need. We’ll help you find a good place to start.</p>
+      </div>
+      <a class="footer-cta-button" href="contact.html">Talk with our team <span aria-hidden="true">↗</span></a>
+    </section>
 
-    <div class="footer-brand">
-      <img src="assets/images/logo2.png" alt="PhysioWaye Logo" class="logo">
-      <p>
-        PhysioWaye provides high-quality physiotherapy and rehabilitation
-        equipment trusted by clinics, hospitals, and home users across India.
-      </p>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <a class="footer-brand-link" href="index.html" aria-label="PhysioWaye home">
+          <img src="assets/images/logo2.png" alt="PhysioWaye" class="logo">
+        </a>
+        <p>Physiotherapy equipment for hands-on care, recovery, and rehabilitation.</p>
+      </div>
+
+      <nav class="footer-column" aria-label="Explore PhysioWaye">
+        <h3>Explore</h3>
+        <a href="products.html">All equipment</a>
+        <a href="about.html">About PhysioWaye</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+
+      <nav class="footer-column" aria-label="Your account">
+        <h3>Your account</h3>
+        <a href="login.html">Sign in</a>
+        <a href="cart.html">Shopping cart</a>
+        <a href="orders.html">Track orders</a>
+      </nav>
+
+      <div class="footer-column footer-contact">
+        <h3>Get in touch</h3>
+        <a class="footer-contact-link" href="mailto:physiowaye@gmail.com"><span>Email</span>physiowaye@gmail.com</a>
+        <a class="footer-contact-link" href="tel:+919140645948"><span>Phone</span>+91 9140645948</a>
+        <p class="footer-location"><span>Based in</span>India</p>
+      </div>
     </div>
 
-    <div class="footer-links">
-      <h4>Quick Links</h4>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="products.html">Products</a></li>
-        <!-- <li><a href="about.html">About Us</a></li>
-        <li><a href="contact.html">Contact</a></li> -->
-        <li><a href="login.html">Login</a></li>
-         <li><a href="profile.html">Profile</a></li>
-      </ul>
+    <div class="footer-bottom">
+      <p>© 2026 PhysioWaye</p>
+      <p>Equipment for clinics and home care</p>
+      <button class="footer-top-button" type="button">Back to top <span aria-hidden="true">↑</span></button>
     </div>
-
-    <div class="footer-contact">
-      <h4>Contact</h4>
-      <p>Email: physiowaye@gmail.com</p>
-      <p>Phone: +91 9140645948</p>
-      <p>Location: India</p>
-    </div>
-
-  </div>
-
-  <div class="footer-bottom">
-    © 2026 PhysioWaye. All rights reserved.
   </div>
 </footer>
 
@@ -177,8 +146,13 @@ Dr. Sharma
   <!-- JS -->
    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-client.js"></script>
+<script src="js/api.js"></script>
+<script src="js/home.js"></script>
   <script src="js/main.js"></script>
   <script src="js/auth.js"></script>
 
+<script src="js/footer.js"></script>
 </body>
 </html>
+
+

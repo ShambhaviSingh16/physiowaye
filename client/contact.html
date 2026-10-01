@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact | PhysioWaye</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/style.css?v=frontend-8">
+  <link rel="stylesheet" href="css/responsive.css?v=frontend-8">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   
   <!-- Cart (hidden by default) -->
   <a href="cart.html" id="cartBtn" class="cart-btn hidden">
-    🛒 Cart <span id="cartCount" class="cart-count">0</span>
+    ðŸ›’ Cart <span id="cartCount" class="cart-count">0</span>
   </a>
   <a href="orders.html"
    id="ordersBtn"
@@ -62,74 +62,90 @@
   </header>
 
 
-<section class="page-hero">
-  <h1>Contact Us</h1>
-  <p>We’re here to help you</p>
-</section>
-
-<section class="page-content">
-  <div class="content-card">
-
-    <form class="contact-form">
-      <div class="form-group">
-        <input type="text" placeholder="Your Name" required>
-        <input type="email" placeholder="Your Email" required>
+<main class="contact-page">
+  <section class="contact-layout">
+    <div class="contact-intro">
+      <span class="eyebrow">LET’S TALK</span>
+      <h1>How can we help?</h1>
+      <p>Ask us about a product, an order, or finding the right equipment for your needs. Choose whichever way is easiest.</p>
+      <div class="contact-channels">
+        <a class="contact-channel" href="mailto:physiowaye@gmail.com"><span class="contact-channel-icon" aria-hidden="true">✉</span><span><small>EMAIL US</small>physiowaye@gmail.com</span></a>
+        <a class="contact-channel" href="tel:+919140645948"><span class="contact-channel-icon" aria-hidden="true">☎</span><span><small>CALL US</small>+91 9140645948</span></a>
+        <div class="contact-channel"><span class="contact-channel-icon" aria-hidden="true">⌖</span><span><small>BASED IN</small>India</span></div>
       </div>
-
-      <textarea placeholder="Your Message" required></textarea>
-
-      <button type="submit" class="btn-primary">Send Message</button>
-    </form>
-
-    <div class="contact-info">
-      <p><strong>Email:</strong> physiowaye@gmail.com</p>
-      <p>Phone: +91 9140645948</p>
-      <p><strong>Location:</strong> India</p>
     </div>
 
-  </div>
-</section>
+    <div class="contact-form-card">
+      <h2>Send us a message</h2>
+      <p>Tell us a little about what you need and we’ll help you take it from there.</p>
+      <form class="contact-form" id="contactForm">
+        <div class="form-group">
+          <div><label for="contactName">Your name</label><input id="contactName" name="name" type="text" autocomplete="name" placeholder="e.g. Priya Sharma" required></div>
+          <div><label for="contactEmail">Email address</label><input id="contactEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+        </div>
+        <div><label for="contactMessage">How can we help?</label><textarea id="contactMessage" name="message" placeholder="Product question, order support, or anything else…" required></textarea></div>
+        <button type="submit" class="btn-primary">Open email to send <span aria-hidden="true">→</span></button>
+        <p class="contact-form-note">This will open your email app with your message ready to send.</p>
+      </form>
+    </div>
+  </section>
+</main>
 
 <!-- FOOTER -->
  <!-- Footer -->
   <footer class="site-footer">
-  <div class="footer-container">
+  <div class="footer-shell">
+    <section class="footer-cta" aria-labelledby="footerCtaTitle">
+      <div class="footer-cta-copy">
+        <span class="footer-kicker">A PERSON TO ASK</span>
+        <h2 id="footerCtaTitle">Finding the right equipment?</h2>
+        <p>Tell us what you need. We’ll help you find a good place to start.</p>
+      </div>
+      <a class="footer-cta-button" href="contact.html">Talk with our team <span aria-hidden="true">↗</span></a>
+    </section>
 
-    <div class="footer-brand">
-      <img src="assets/images/logo2.png" alt="PhysioWaye Logo" class="logo">
-      <p>
-        PhysioWaye provides high-quality physiotherapy and rehabilitation
-        equipment trusted by clinics, hospitals, and home users across India.
-      </p>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <a class="footer-brand-link" href="index.html" aria-label="PhysioWaye home">
+          <img src="assets/images/logo2.png" alt="PhysioWaye" class="logo">
+        </a>
+        <p>Physiotherapy equipment for hands-on care, recovery, and rehabilitation.</p>
+      </div>
+
+      <nav class="footer-column" aria-label="Explore PhysioWaye">
+        <h3>Explore</h3>
+        <a href="products.html">All equipment</a>
+        <a href="about.html">About PhysioWaye</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+
+      <nav class="footer-column" aria-label="Your account">
+        <h3>Your account</h3>
+        <a href="login.html">Sign in</a>
+        <a href="cart.html">Shopping cart</a>
+        <a href="orders.html">Track orders</a>
+      </nav>
+
+      <div class="footer-column footer-contact">
+        <h3>Get in touch</h3>
+        <a class="footer-contact-link" href="mailto:physiowaye@gmail.com"><span>Email</span>physiowaye@gmail.com</a>
+        <a class="footer-contact-link" href="tel:+919140645948"><span>Phone</span>+91 9140645948</a>
+        <p class="footer-location"><span>Based in</span>India</p>
+      </div>
     </div>
 
-    <div class="footer-links">
-      <h4>Quick Links</h4>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="products.html">Products</a></li>
-        <li><a href="about.html">About Us</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        <li><a href="login.html">Login</a></li>
-         <li><a href="profile.html">Profile</a></li>
-      </ul>
+    <div class="footer-bottom">
+      <p>© 2026 PhysioWaye</p>
+      <p>Equipment for clinics and home care</p>
+      <button class="footer-top-button" type="button">Back to top <span aria-hidden="true">↑</span></button>
     </div>
-
-    <div class="footer-contact">
-      <h4>Contact</h4>
-      <p>Email: physiowaye@gmail.com</p>
-      <p>Phone: +91 9140645948</p>
-      <p>Location: India</p>
-    </div>
-
-  </div>
-
-  <div class="footer-bottom">
-    © 2026 PhysioWaye. All rights reserved.
   </div>
 </footer>
 
 
+<script src="js/footer.js"></script>
 </body>
 <script src="js/main.js"></script>
+<script src="js/contact.js"></script>
 </html>
+

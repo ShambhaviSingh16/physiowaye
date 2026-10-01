@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Products | PhysioWaye</title>
 
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/style.css?v=frontend-8">
+  <link rel="stylesheet" href="css/responsive.css?v=frontend-8">
 </head>
 <body>
 
@@ -21,8 +21,8 @@
   <nav class="nav-links" id="navLinks">
   <a href="index.html">Home</a>
   <a href="products.html">Products</a>
-  <!-- <a href="about.html">About</a>
-  <a href="contact.html">Contact</a> -->
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
 
   <!-- Login -->
   <a href="login.html" id="loginBtn" class="login-btn">Login</a>
@@ -30,7 +30,7 @@
   
   <!-- Cart (hidden by default) -->
   <a href="cart.html" id="cartBtn" class="cart-btn hidden">
-    🛒 Cart <span id="cartCount" class="cart-count">0</span>
+    ðŸ›’ Cart <span id="cartCount" class="cart-count">0</span>
   </a>
  <a href="orders.html"
    id="ordersBtn"
@@ -56,60 +56,80 @@
 
   <!-- Products Section -->
   <section class="products-section">
-    <h2>Our Physiotherapy Products</h2>
+    <div class="catalog-heading">
+      <span class="eyebrow">PHYSIOWAYE STORE</span>
+      <h1>Equipment for better recovery</h1>
+      <p>Explore professional physiotherapy and rehabilitation equipment for clinics and home care.</p>
+    </div>
 <input
   type="text"
   id="searchInput"
   placeholder="Search physiotherapy equipment..."
   class="search-box"
+  aria-label="Search products"
 />
-
+    <p id="productsStatus" class="products-status" role="status" aria-live="polite">Loading productsâ€¦</p>
     <div class="products-grid" id="productsGrid">
       <!-- Products injected via JS -->
     </div>
   </section>
 
   <footer class="site-footer">
-  <div class="footer-container">
+  <div class="footer-shell">
+    <section class="footer-cta" aria-labelledby="footerCtaTitle">
+      <div class="footer-cta-copy">
+        <span class="footer-kicker">A PERSON TO ASK</span>
+        <h2 id="footerCtaTitle">Finding the right equipment?</h2>
+        <p>Tell us what you need. We’ll help you find a good place to start.</p>
+      </div>
+      <a class="footer-cta-button" href="contact.html">Talk with our team <span aria-hidden="true">↗</span></a>
+    </section>
 
-    <div class="footer-brand">
-      <img src="assets/images/logo2.png" alt="PhysioWaye Logo" class="logo">
-      <p>
-        PhysioWaye provides high-quality physiotherapy and rehabilitation
-        equipment trusted by clinics, hospitals, and home users across India.
-      </p>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <a class="footer-brand-link" href="index.html" aria-label="PhysioWaye home">
+          <img src="assets/images/logo2.png" alt="PhysioWaye" class="logo">
+        </a>
+        <p>Physiotherapy equipment for hands-on care, recovery, and rehabilitation.</p>
+      </div>
+
+      <nav class="footer-column" aria-label="Explore PhysioWaye">
+        <h3>Explore</h3>
+        <a href="products.html">All equipment</a>
+        <a href="about.html">About PhysioWaye</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+
+      <nav class="footer-column" aria-label="Your account">
+        <h3>Your account</h3>
+        <a href="login.html">Sign in</a>
+        <a href="cart.html">Shopping cart</a>
+        <a href="orders.html">Track orders</a>
+      </nav>
+
+      <div class="footer-column footer-contact">
+        <h3>Get in touch</h3>
+        <a class="footer-contact-link" href="mailto:physiowaye@gmail.com"><span>Email</span>physiowaye@gmail.com</a>
+        <a class="footer-contact-link" href="tel:+919140645948"><span>Phone</span>+91 9140645948</a>
+        <p class="footer-location"><span>Based in</span>India</p>
+      </div>
     </div>
 
-    <div class="footer-links">
-      <h4>Quick Links</h4>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="products.html">Products</a></li>
-        <!-- <li><a href="about.html">About Us</a></li>
-        <li><a href="contact.html">Contact</a></li> -->
-        <li><a href="login.html">Login</a></li>
-         <li><a href="profile.html">Profile</a></li>
-      </ul>
+    <div class="footer-bottom">
+      <p>© 2026 PhysioWaye</p>
+      <p>Equipment for clinics and home care</p>
+      <button class="footer-top-button" type="button">Back to top <span aria-hidden="true">↑</span></button>
     </div>
-
-    <div class="footer-contact">
-      <h4>Contact</h4>
-      <p>Email: physiowaye@gmail.com</p>
-      <p>Phone: +91 9140645948</p>
-      <p>Location: India</p>
-    </div>
-
-  </div>
-
-  <div class="footer-bottom">
-    © 2026 PhysioWaye. All rights reserved.
   </div>
 </footer>
+<script src="js/footer.js"></script>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-client.js"></script>
+<script src="js/api.js"></script>
   <script src="js/main.js"></script>
   <script src="js/products.js"></script>
   <script src="js/auth.js"></script>
 
 </html>
+

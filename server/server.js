@@ -5,6 +5,7 @@ const express = require("express");
 // const mysql = require("mysql2");
 const cors = require("cors");
 const Razorpay = require("razorpay");
+const requireAuth = require("./middleware/auth");
 
 
 const app = express();
@@ -74,13 +75,16 @@ app.get("/api/products/:id", async (req, res) => {
 
 /* ---------- ADD TO CART ---------- */
 
+app.use("/api/cart", requireAuth);
+
 app.post("/api/cart", async (req, res) => {
 
   try {
 
     console.log("CART REQUEST:", req.body);
 
-    const { user_id, product_id, quantity } = req.body;
+    const { product_id, quantity } = req.body;
+    const user_id = req.user.id;
 
     const { data: existing, error: existingError } =
       await supabase
@@ -157,13 +161,14 @@ app.get("/api/cart/:userId", async (req, res) => {
         quantity,
         products (
           id,
+          sku,
           product_name,
           selling_price,
           mrp,
           image_url
         )
       `)
-      .eq("user_id", req.params.userId);
+      .eq("user_id", req.user.id);
 
     if (error) {
       return res.status(500).json(error);
@@ -188,7 +193,8 @@ app.delete("/api/cart/:cartId", async (req, res) => {
     const { error } = await supabase
       .from("cart")
       .delete()
-      .eq("id", req.params.cartId);
+      .eq("id", req.params.cartId)
+      .eq("user_id", req.user.id);
 
     if (error) {
       return res.status(500).json(error);
@@ -217,7 +223,8 @@ app.put("/api/cart/:cartId", async (req, res) => {
     const { error } = await supabase
       .from("cart")
       .update({ quantity })
-      .eq("id", req.params.cartId);
+      .eq("id", req.params.cartId)
+      .eq("user_id", req.user.id);
 
     if (error) {
       return res.status(500).json(error);
@@ -235,7 +242,7 @@ app.put("/api/cart/:cartId", async (req, res) => {
 
 });
 
-app.post("/api/create-razorpay-order", async (req, res) => {
+app.post("/api/create-razorpay-order", requireAuth, async (req, res) => {
 
   try {
 
@@ -265,17 +272,19 @@ app.post("/api/create-razorpay-order", async (req, res) => {
 
 /* ---------- CREATE ORDER ---------- */
 
+app.use("/api/orders", requireAuth);
+
 app.post("/api/orders", async (req, res) => {
 
   try {
 
-    const { user_id, items, total_amount } = req.body;
+    const { items, total_amount } = req.body;
 
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert([
         {
-          user_id,
+          user_id: req.user.id,
           total_amount,
           status: "Pending"
         }
@@ -327,7 +336,7 @@ app.get("/api/orders/:userId", async (req, res) => {
         .select("*")
         .eq(
           "user_id",
-          req.params.userId
+          req.user.id
         )
         .order(
           "created_at",
