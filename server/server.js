@@ -246,24 +246,32 @@ app.post("/api/create-razorpay-order", requireAuth, async (req, res) => {
 
   try {
 
-    const { amount } = req.body;
+    const amount = Number(req.body.amount);
+    if (!Number.isFinite(amount) || amount <= 0 || !Number.isSafeInteger(Math.round(amount * 100))) {
+      return res.status(400).json({ error: "Invalid payment amount." });
+    }
 
     const options = {
-      amount: amount * 100,
+      amount: Math.round(amount * 100),
       currency: "INR",
       receipt: `receipt_${Date.now()}`
     };
 
     const order = await razorpay.orders.create(options);
 
-    res.json(order);
+    res.json({ ...order, key_id: process.env.RAZORPAY_KEY_ID });
 
   } catch (err) {
 
-    console.error(err);
-
-    res.status(500).json({
-      error: err.message
+    const providerError = err.error || {};
+    console.error("Razorpay order creation failed", {
+      status: err.statusCode,
+      code: providerError.code,
+      description: providerError.description || err.message
+    });
+    res.status(502).json({
+      error: "Payment could not start. Please contact our team if this continues.",
+      code: providerError.code || "PAYMENT_ORDER_FAILED"
     });
 
   }

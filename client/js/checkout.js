@@ -77,11 +77,15 @@ form.addEventListener('submit', async event => {
     const total = renderLines(lines);
     const items = lines.map(line => ({ id: line.products.id, qty: Number(line.quantity), price: Number(line.products.selling_price) }));
     const response = await apiFetch('/create-razorpay-order', { method: 'POST', body: JSON.stringify({ amount: total }) });
-    if (!response.ok) throw new Error('Payment could not start. Please try again.');
-    const paymentOrder = await response.json();
+    const paymentOrder = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error('Payment order request failed', { status: response.status, code: paymentOrder.code, error: paymentOrder.error });
+      if (response.status === 401 || response.status === 403) throw new Error('Your sign-in has expired. Please sign in again before paying.');
+      throw new Error(paymentOrder.error || paymentOrder.message || `Payment service is unavailable (${response.status}). Please contact our team.`);
+    }
     if (!window.Razorpay || !paymentOrder.id) throw new Error('Payment is unavailable. Please refresh and try again.');
     const payment = new Razorpay({
-      key: 'rzp_test_T51j3XaiQx5sos', amount: paymentOrder.amount, currency: 'INR', name: 'PhysioWaye', description: 'Equipment order', order_id: paymentOrder.id,
+      key: paymentOrder.key_id || 'rzp_test_T51j3XaiQx5sos', amount: paymentOrder.amount, currency: 'INR', name: 'PhysioWaye', description: 'Equipment order', order_id: paymentOrder.id,
       prefill: { name: document.getElementById('name').value.trim(), email: document.getElementById('email').value.trim(), contact: document.getElementById('phone').value.trim() },
       theme: { color: '#158ec1' },
       modal: { ondismiss: () => { if (recordingOrder || orderCompleted) return; setBusy(false); statusMessage.textContent = 'Payment was closed. You can continue when you are ready.'; } },
