@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PhysioWaye | Physiotherapy Equipment</title>
 
-  <link rel="stylesheet" href="css/style.css?v=frontend-8">
-  <link rel="stylesheet" href="css/responsive.css?v=frontend-8">
+  <link rel="stylesheet" href="css/style.css?v=frontend-11">
+  <link rel="stylesheet" href="css/responsive.css?v=frontend-11">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   
   <!-- Cart (hidden by default) -->
   <a href="cart.html" id="cartBtn" class="cart-btn hidden">
-    ðŸ›’ Cart <span id="cartCount" class="cart-count">0</span>
+    <svg class="nav-cart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.1a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H6"/><circle cx="10" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/></svg> Cart <span id="cartCount" class="cart-count">0</span>
   </a>
 <a href="orders.html"
    id="ordersBtn"
@@ -60,15 +60,20 @@
   <main class="home-landing">
     <section class="home-hero">
       <div class="home-hero-copy">
-        <span class="eyebrow">PHYSIOTHERAPY EQUIPMENT, MADE EASIER TO FIND</span>
-        <h1>Build a better space for recovery.</h1>
-        <p>Explore practical therapy and rehabilitation equipment for clinics, practitioners, and care at home—with clear product details and a real team to contact.</p>
+        <span class="eyebrow">PHYSIOTHERAPY EQUIPMENT, WITHOUT THE GUESSWORK</span>
+        <h1>Equipment for better recovery.</h1>
+        <p>See the products, compare prices, and find equipment for your clinic or home. Need a hand choosing? Our team is easy to reach.</p>
         <form class="home-search" action="products.html" method="get" role="search">
           <label class="visually-hidden" for="homeProductSearch">Search equipment</label>
           <input id="homeProductSearch" name="search" type="search" placeholder="What equipment are you looking for?">
           <button type="submit">Search <span aria-hidden="true">→</span></button>
         </form>
-        <div class="home-hero-links"><a href="products.html">Browse all equipment <span aria-hidden="true">↗</span></a><a href="contact.html">Need help choosing?</a></div>
+        <div class="home-hero-links"><a href="products.html">Browse all equipment <span aria-hidden="true">↗</span></a><a href="https://wa.me/919540043453?text=Hello%20PhysioWaye%2C%20I%27d%20like%20to%20speak%20with%20an%20agent%20about%20physiotherapy%20equipment." target="_blank" rel="noopener noreferrer">Chat with our agent</a></div>
+        <div class="home-proof-points" aria-label="Shopping information">
+          <span><i aria-hidden="true">✓</i> Clear product details</span>
+          <span><i aria-hidden="true">✓</i> Upfront pricing</span>
+          <span><i aria-hidden="true">✓</i> Help from our team</span>
+        </div>
       </div>
       <div class="home-hero-image">
         <img src="assets/images/home/clinic-hero.jpg" alt="A physiotherapist consulting with a patient in a bright rehabilitation clinic" fetchpriority="high">
@@ -76,19 +81,19 @@
         <span class="home-image-index" aria-hidden="true">PHYSIOWAYE / CARE</span>
       </div>
     </section>
-    <section class="home-categories" aria-label="Shop by need">
-      <a href="products.html?search=therapy"><span>01</span><strong>Therapy equipment</strong><span aria-hidden="true">↗</span></a>
-      <a href="products.html?search=rehabilitation"><span>02</span><strong>Rehabilitation</strong><span aria-hidden="true">↗</span></a>
-      <a href="products.html?search=portable"><span>03</span><strong>Portable devices</strong><span aria-hidden="true">↗</span></a>
+    <section class="home-categories" aria-label="Explore equipment">
+      <a href="products.html?search=ultrasound"><span class="home-category-index">01 / SHOP</span><span class="home-category-arrow" aria-hidden="true">↗</span><h2>Ultrasound therapy</h2><p>Explore ultrasound devices and related equipment.</p></a>
+      <a href="products.html?search=TENS"><span class="home-category-index">02 / EXPLORE</span><span class="home-category-arrow" aria-hidden="true">↗</span><h2>Muscle stimulation</h2><p>Browse TENS and electrical stimulation equipment.</p></a>
+      <a href="products.html?search=portable"><span class="home-category-index">03 / DISCOVER</span><span class="home-category-arrow" aria-hidden="true">↗</span><h2>Portable devices</h2><p>Compact options for care beyond the clinic.</p></a>
     </section>
     <section class="home-featured">
-      <div class="home-featured-heading"><div><span class="eyebrow">A PLACE TO START</span><h2>Explore the equipment</h2><p>Take a closer look at some of the products in our store.</p></div><a href="products.html">View all products <span aria-hidden="true">→</span></a></div>
+      <div class="home-featured-heading"><div><span class="eyebrow">A FEW FROM THE STORE</span><h2>Take a closer look.</h2><p>See product photos, details, and prices before you decide.</p></div><a href="products.html">View all products <span aria-hidden="true">→</span></a></div>
       <div class="home-featured-grid" id="homeFeaturedProducts" aria-live="polite"><p class="home-loading">Finding products for you…</p></div>
     </section>
     <section class="home-service-strip">
       <div><span class="eyebrow">A CLEARER WAY TO SHOP</span><h2>Know what you’re choosing.</h2></div>
       <p>Compare product information, check availability, and ask our team when you want a little more guidance.</p>
-      <a class="btn-primary" href="contact.html">Talk to our team <span aria-hidden="true">↗</span></a>
+      <a class="btn-primary" href="https://wa.me/919540043453?text=Hello%20PhysioWaye%2C%20I%27d%20like%20to%20speak%20with%20an%20agent%20about%20physiotherapy%20equipment." target="_blank" rel="noopener noreferrer">Talk to our agent <span aria-hidden="true">↗</span></a>
     </section>
   </main>
 
@@ -101,7 +106,7 @@
         <h2 id="footerCtaTitle">Finding the right equipment?</h2>
         <p>Tell us what you need. We’ll help you find a good place to start.</p>
       </div>
-      <a class="footer-cta-button" href="contact.html">Talk with our team <span aria-hidden="true">↗</span></a>
+      <a class="footer-cta-button" href="https://wa.me/919540043453?text=Hello%20PhysioWaye%2C%20I%27d%20like%20to%20speak%20with%20an%20agent%20about%20physiotherapy%20equipment." target="_blank" rel="noopener noreferrer">Talk to our agent <span aria-hidden="true">↗</span></a>
     </section>
 
     <div class="footer-main">
@@ -154,5 +159,10 @@
 <script src="js/footer.js"></script>
 </body>
 </html>
+
+
+
+
+
 
 

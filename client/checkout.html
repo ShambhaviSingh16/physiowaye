@@ -1,227 +1,35 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout | PhysioWaye</title>
-
-    <link rel="stylesheet" href="css/style.css?v=frontend-5">
-
-    <style>
-        .checkout-wrapper {
-            max-width: 900px;
-            margin: 80px auto;
-            padding: 20px;
-        }
-
-        .checkout-card {
-            background: #fff;
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, .08);
-            animation: fadeUp .5s ease;
-        }
-
-        .checkout-title {
-            font-size: 2rem;
-            color: #1F2A44;
-            margin-bottom: 25px;
-        }
-
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-            padding: 15px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .order-item:last-child {
-            border: none;
-        }
-
-        .order-name {
-            font-weight: 600;
-            color: #1F2A44;
-        }
-
-        .order-qty {
-            color: #64748b;
-        }
-
-        .summary-box {
-            margin-top: 25px;
-            padding: 20px;
-            border-radius: 16px;
-            background: #f8fbff;
-        }
-
-        .summary-box h3 {
-            color: #2e91d1;
-        }
-
-        .checkout-form {
-            margin-top: 30px;
-        }
-
-        .checkout-form input,
-        .checkout-form textarea {
-            width: 100%;
-            padding: 14px 16px;
-            margin-bottom: 15px;
-            border: 1px solid #dbe4ee;
-            border-radius: 12px;
-            font-size: 15px;
-        }
-
-        .checkout-form input:focus,
-        .checkout-form textarea:focus {
-            outline: none;
-            border-color: #2e91d1;
-        }
-
-        .checkout-form textarea {
-            resize: none;
-            height: 120px;
-        }
-
-        .place-order-btn {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .empty-checkout {
-            text-align: center;
-            padding: 50px 20px;
-        }
-
-        .empty-checkout h2 {
-            margin-bottom: 10px;
-        }
-
-        @media(max-width:768px) {
-
-            .checkout-card {
-                padding: 25px;
-            }
-
-            .checkout-title {
-                font-size: 1.7rem;
-            }
-
-        }
-    </style>
-
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout | PhysioWaye</title>
+<link rel="stylesheet" href="css/style.css?v=frontend-12">
+<link rel="stylesheet" href="css/checkout.css?v=checkout-1">
 </head>
-
-<body>
-    <header class="navbar">
-        <div class="nav-container">
-
-            <div class="logo-wrapper">
-                <img src="assets/images/logo.png" class="logo">
-            </div>
-
-            <nav class="nav-links" id="navLinks">
-
-                <a href="index.html">Home</a>
-
-                <a href="products.html">Products</a>
-
-                <!-- <a href="about.html">About</a> -->
-
-                <!-- <a href="contact.html">Contact</a> -->
-
-                <a href="cart.html" id="cartBtn" class="cart-btn">
-                    ðŸ›’ Cart
-                </a>
-
-                <a href="orders.html" id="ordersBtn">
-                    Orders
-                </a>
-
-                <a href="index.html" id="logoutBtn" class="login-btn">
-                    Logout
-                </a>
-
-            </nav>
-            <div class="menu-toggle" id="menuToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </header>
-    <section class="checkout-wrapper">
-
-        <div class="checkout-card">
-
-            <h1 class="checkout-title">
-                Checkout
-            </h1>
-
-            <div id="orderSummary"></div>
-
-            <div class="checkout-form">
-
-                <input type="text" id="name" placeholder="Full Name">
-
-                <input type="email" id="email" placeholder="Email Address">
-
-                <input type="tel" id="phone" placeholder="Phone Number">
-
-                <textarea id="address" placeholder="Delivery Address"></textarea>
-
-            </div>
-
-            <button onclick="placeOrder()" class="btn-primary place-order-btn">
-                Place Order
-            </button>
-
-        </div>
-
-    </section>
-    <div class="payment-methods">
-
-<label>
-<input type="radio"
-       name="paymentMethod"
-       value="online"
-       checked>
-Online Payment
-</label>
-
-<label>
-<input type="radio"
-       name="paymentMethod"
-       value="cod">
-Cash on Delivery
-</label>
-
+<body class="checkout-page">
+<header class="checkout-header"><a href="index.html" aria-label="PhysioWaye home"><img src="assets/images/logo.png" alt="PhysioWaye"></a><span class="checkout-header-note">Your order, one step closer</span><a href="cart.html">Back to cart</a></header>
+<main class="checkout-shell">
+<div class="checkout-heading"><div><span class="checkout-kicker">THE FINAL STEP</span><h1>Let’s get your order ready.</h1><p>Add your delivery details and review your items before payment.</p></div><a href="https://wa.me/919540043453" target="_blank" rel="noopener noreferrer">Need help? Chat with us ↗</a></div>
+<ol class="checkout-progress" aria-label="Checkout progress"><li class="complete"><span>✓</span> Shopping bag</li><li class="active" aria-current="step"><span>2</span> Delivery & review</li><li><span>3</span> Payment</li></ol>
+<form id="checkoutForm" class="checkout-layout">
+<div class="checkout-main">
+<section class="checkout-panel"><div class="checkout-panel-title"><span class="checkout-number">01</span><div><h2>Delivery details</h2><p>Where should we send your equipment?</p></div></div>
+<div class="checkout-fields">
+<label>Full name<input id="name" autocomplete="name" required maxlength="100" placeholder="Name of the recipient"></label>
+<label>Email address<input id="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+<label>Mobile number<input id="phone" type="tel" autocomplete="tel" required pattern="[+0-9 ()-]{10,16}" placeholder="10-digit mobile number"><small>For questions about your delivery</small></label>
+<label>PIN code<input id="pincode" inputmode="numeric" autocomplete="postal-code" required pattern="[1-9][0-9]{5}" maxlength="6" placeholder="6-digit PIN code"></label>
+<label class="checkout-field-wide">Address<textarea id="address" autocomplete="street-address" required minlength="10" maxlength="500" rows="2" placeholder="House / building, street, area"></textarea></label>
+<label>City<input id="city" autocomplete="address-level2" required placeholder="City or town" maxlength="100"></label>
+<label>State / Union territory<input id="state" autocomplete="address-level1" required placeholder="State" maxlength="100"></label>
+</div></section>
+<section class="checkout-panel"><div class="checkout-panel-title"><span class="checkout-number">02</span><div><h2>Review your items</h2><p id="reviewCount">Loading your order…</p></div><a id="editBag" href="cart.html">Edit bag</a></div><div id="orderSummary" aria-live="polite" aria-busy="true"><div class="checkout-loading">Loading products and prices…</div></div></section>
+<section class="checkout-panel"><div class="checkout-panel-title"><span class="checkout-number">03</span><div><h2>Payment</h2><p>Choose your payment method in the next window.</p></div></div><div class="checkout-payment"><span class="checkout-payment-mark" aria-hidden="true">₹</span><div><strong>Pay online with Razorpay</strong><p>Available payment options appear when you continue.</p></div><span class="checkout-payment-selected" aria-hidden="true">✓</span></div></section>
 </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-client.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/checkout.js"></script>
-    <div id="successModal" class="success-modal">
-        <div class="success-box">
-            <div class="success-icon">âœ“</div>
-
-            <h2>Order Placed!</h2>
-
-            <p id="orderMessage"></p>
-
-            <button onclick="goToOrders()">
-                View Orders
-            </button>
-        </div>
-    </div>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-</body>
-
-</html>
-
+<aside class="checkout-sidebar"><section class="checkout-panel checkout-price-panel"><h2>Order summary</h2><div class="checkout-totals"><div><span id="subtotalLabel">Item subtotal</span><strong id="subtotal">—</strong></div><div id="savingsRow" hidden><span>Product savings</span><strong id="savings">—</strong></div><div><span>Additional charges</span><strong>₹0</strong></div></div><div class="checkout-total"><span>Total payable</span><strong id="grandTotal">—</strong></div><p class="checkout-price-note">Review this total before continuing to payment.</p><button id="payButton" class="checkout-pay-button" type="submit" disabled>Continue to payment <span aria-hidden="true">→</span></button><p id="checkoutStatus" role="status" aria-live="polite"></p><p class="checkout-payment-note">You’ll complete payment in the Razorpay window.</p></section><div class="checkout-help"><strong>A question about your order?</strong><p>Our team can help with products and ordering.</p><a href="https://wa.me/919540043453" target="_blank" rel="noopener noreferrer">Talk to our agent ↗</a></div></aside>
+</form>
+<div class="checkout-bottom"><span>PhysioWaye · Equipment for clinics and home care</span><a href="contact.html">Contact support</a></div>
+</main>
+<div id="successModal" class="checkout-success" hidden role="dialog" aria-modal="true" aria-labelledby="successTitle"><div class="checkout-success-box"><span class="checkout-success-check" aria-hidden="true">✓</span><h2 id="successTitle">Your order is placed.</h2><p id="orderMessage"></p><a id="viewOrders" href="orders.html" class="checkout-pay-button">View your orders →</a></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase-client.js"></script><script src="js/api.js"></script><script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="js/checkout.js?v=checkout-2"></script>
+</body></html>

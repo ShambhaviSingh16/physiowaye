@@ -1,111 +1,106 @@
-const user = JSON.parse(sessionStorage.getItem("user"));
-const summary = document.getElementById("orderSummary");
-const buyNowProductId = new URLSearchParams(window.location.search).get("buyNow");
-
-if (!user) window.location.href = "login.html";
-
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, character => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  })[character]);
-}
-
+﻿const summary = document.getElementById('orderSummary');
+const form = document.getElementById('checkoutForm');
+const payButton = document.getElementById('payButton');
+const statusMessage = document.getElementById('checkoutStatus');
+const buyNowProductId = new URLSearchParams(location.search).get('buyNow');
+const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+let checkoutUser;
+let paymentBusy = false;
+let recordingOrder = false;
+let orderCompleted = false;
+function escapeHTML(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]); }
+function setBusy(busy) { paymentBusy = busy; payButton.disabled = busy; payButton.textContent = busy ? 'Opening payment…' : 'Continue to payment →'; }
 async function getCheckoutLines() {
-  if (buyNowProductId) {
-    const response = await apiFetch(`/products/${encodeURIComponent(buyNowProductId)}`);
-    if (!response.ok) throw new Error("This product is unavailable.");
-    const product = await response.json();
-    if (Number(product.stock) < 1) throw new Error("This product is currently out of stock.");
-    return [{ id: null, quantity: 1, products: product }];
+  const response = await apiFetch(buyNowProductId ? `/products/${encodeURIComponent(buyNowProductId)}` : `/cart/${checkoutUser.id}`);
+  if (!response.ok) throw new Error('We could not load your order. Please try again.');
+  const data = await response.json();
+  const lines = buyNowProductId ? [{ id: null, quantity: 1, products: data }] : data;
+  if (!Array.isArray(lines)) throw new Error('Your order could not be loaded.');
+  for (const line of lines) {
+    if (!line.products || !Number.isInteger(Number(line.quantity)) || Number(line.quantity) < 1) throw new Error('Please review the items in your cart.');
+    if (Number(line.products.stock) < Number(line.quantity)) throw new Error('An item has insufficient stock. Please update your cart.');
   }
-  const response = await apiFetch(`/cart/${user.id}`);
-  if (!response.ok) throw new Error("Could not load your cart.");
-  return response.json();
+  return lines;
 }
-
-async function renderSummary() {
+function renderLines(lines) {
+  let total = 0, count = 0, savings = 0;
+  summary.replaceChildren();
+  for (const line of lines) {
+    const product = line.products;
+    const quantity = Number(line.quantity);
+    total += Number(product.selling_price) * quantity;
+    count += quantity;
+    savings += Math.max(0, Number(product.mrp || 0) - Number(product.selling_price)) * quantity;
+    const row = document.createElement('article');
+    row.className = 'checkout-line';
+    row.innerHTML = `<img alt=""><div><a href="product.html?id=${encodeURIComponent(product.id)}"><h3>${escapeHTML(product.product_name)}</h3></a><p>Qty: ${quantity} · ${money.format(product.selling_price)} each</p></div><strong>${money.format(Number(product.selling_price) * quantity)}</strong>`;
+    const image = row.querySelector('img');
+    const local = product.sku ? `assets/images/products/${String(product.sku).toLowerCase()}.jpg` : '';
+    image.src = product.image_url || local;
+    image.alt = product.product_name;
+    image.onerror = () => { image.onerror = null; if (local && image.getAttribute('src') !== local) image.src = local; else image.hidden = true; };
+    summary.append(row);
+  }
+  document.getElementById('reviewCount').textContent = `${count} ${count === 1 ? 'item' : 'items'} in this order`;
+  document.getElementById('subtotalLabel').textContent = `Item subtotal (${count})`;
+  document.getElementById('subtotal').textContent = money.format(total);
+  document.getElementById('grandTotal').textContent = money.format(total);
+  document.getElementById('savingsRow').hidden = savings === 0;
+  document.getElementById('savings').textContent = money.format(savings);
+  document.getElementById('editBag').href = buyNowProductId ? `product.html?id=${encodeURIComponent(buyNowProductId)}` : 'cart.html';
+  document.getElementById('editBag').textContent = buyNowProductId ? 'View product' : 'Edit bag';
+  return total;
+}
+async function initializeCheckout() {
   try {
-    const lines = await getCheckoutLines();
-    if (!lines.length) {
-      summary.innerHTML = '<div class="empty-checkout"><h2>Your Cart is Empty</h2><p>Add products before checkout.</p></div>';
-      document.querySelector(".place-order-btn").style.display = "none";
-      return;
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      if (buyNowProductId) sessionStorage.setItem('physiowaye_pending_purchase', JSON.stringify({ action: 'buyNow', productId: buyNowProductId }));
+      location.replace('login.html'); return;
     }
-    let totalItems = 0;
-    let totalPrice = 0;
-    let html = "";
-    lines.forEach(item => {
-      const product = item.products;
-      const quantity = Number(item.quantity) || 1;
-      const lineTotal = Number(product.selling_price) * quantity;
-      totalItems += quantity;
-      totalPrice += lineTotal;
-      html += `<div class="order-item"><div><div class="order-name">${escapeHTML(product.product_name)}</div><div class="order-qty">Quantity: ${quantity}</div></div><div>${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(lineTotal)}</div></div>`;
-    });
-    html += `<div class="summary-box"><h3>Total Items: ${totalItems}</h3><h3>Total Amount: ${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(totalPrice)}</h3></div>`;
-    summary.innerHTML = html;
-  } catch (error) {
-    summary.innerHTML = `<div class="empty-checkout"><h2>Checkout unavailable</h2><p>${error.message}</p><a href="products.html">Return to products</a></div>`;
-    document.querySelector(".place-order-btn").style.display = "none";
-  }
+    checkoutUser = session.user;
+    document.getElementById('name').value = checkoutUser.user_metadata?.full_name || '';
+    document.getElementById('email').value = checkoutUser.email || '';
+    const lines = await getCheckoutLines();
+    if (!lines.length) { summary.innerHTML = '<div class="empty-checkout">Your bag is empty. <a href="products.html">Explore equipment →</a></div>'; document.getElementById('reviewCount').textContent = 'No items to check out'; return; }
+    renderLines(lines); payButton.disabled = false;
+  } catch (error) { summary.innerHTML = '<div class="empty-checkout">We could not load your items. <a href="checkout.html">Try again</a></div>'; statusMessage.textContent = error.message; }
+  finally { summary.removeAttribute('aria-busy'); }
 }
-
-renderSummary();
-
-window.placeOrder = async function () {
-  if (!user) return;
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const address = document.getElementById("address").value.trim();
-  if (!name || !email || !phone || !address) return alert("Please fill all details");
-
+form.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (paymentBusy || !checkoutUser || !form.reportValidity()) return;
+  statusMessage.textContent = ''; setBusy(true);
   try {
     const lines = await getCheckoutLines();
-    if (!lines.length) return alert("Your cart is empty.");
-    const items = lines.map(item => ({
-      id: item.products.id,
-      qty: Number(item.quantity) || 1,
-      price: Number(item.products.selling_price) || 0
-    }));
-    const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-    const razorpayRes = await apiFetch("/create-razorpay-order", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount: total })
-    });
-    if (!razorpayRes.ok) throw new Error("Could not start payment. Please try again.");
-    const razorpayOrder = await razorpayRes.json();
-    const options = {
-      key: "rzp_test_T51j3XaiQx5sos", amount: razorpayOrder.amount, currency: "INR",
-      name: "PhysioWaye", description: "Order Payment", order_id: razorpayOrder.id,
+    if (!lines.length) throw new Error('Your bag is empty.');
+    const total = renderLines(lines);
+    const items = lines.map(line => ({ id: line.products.id, qty: Number(line.quantity), price: Number(line.products.selling_price) }));
+    const response = await apiFetch('/create-razorpay-order', { method: 'POST', body: JSON.stringify({ amount: total }) });
+    if (!response.ok) throw new Error('Payment could not start. Please try again.');
+    const paymentOrder = await response.json();
+    if (!window.Razorpay || !paymentOrder.id) throw new Error('Payment is unavailable. Please refresh and try again.');
+    const payment = new Razorpay({
+      key: 'rzp_test_T51j3XaiQx5sos', amount: paymentOrder.amount, currency: 'INR', name: 'PhysioWaye', description: 'Equipment order', order_id: paymentOrder.id,
+      prefill: { name: document.getElementById('name').value.trim(), email: document.getElementById('email').value.trim(), contact: document.getElementById('phone').value.trim() },
+      theme: { color: '#158ec1' },
+      modal: { ondismiss: () => { if (recordingOrder || orderCompleted) return; setBusy(false); statusMessage.textContent = 'Payment was closed. You can continue when you are ready.'; } },
       handler: async function () {
+        recordingOrder = true; payButton.textContent = 'Confirming your order…';
         try {
-          const orderRes = await apiFetch("/orders", {
-            method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items, total_amount: total })
-          });
-          const result = await orderRes.json();
-          if (!orderRes.ok || !result.success) throw new Error("Order could not be recorded.");
-          if (!buyNowProductId) {
-            for (const line of lines) await apiFetch(`/cart/${line.id}`, { method: "DELETE" });
-          }
-          showOrderSuccess(result.order_id);
-        } catch (error) {
-          console.error(error);
-          alert(error.message || "Order failed. Please contact support before retrying payment.");
-        }
-      },
-      prefill: { name, email, contact: phone },
-      theme: { color: "#168fc8" }
-    };
-    new Razorpay(options).open();
-  } catch (error) {
-    console.error(error);
-    alert(error.message || "Something went wrong.");
-  }
-};
-
-function showOrderSuccess(orderId) {
-  document.getElementById("orderMessage").textContent = "Your order has been placed successfully.";
-  document.getElementById("successModal").style.display = "flex";
-}
-
-function goToOrders() { window.location.href = "orders.html"; }
+          const orderResponse = await apiFetch('/orders', { method: 'POST', body: JSON.stringify({ items, total_amount: total }) });
+          const result = await orderResponse.json();
+          if (!orderResponse.ok || !result.success) throw new Error('Payment completed, but the order could not be recorded. Contact support before making another payment.');
+          orderCompleted = true;
+          if (!buyNowProductId) await Promise.allSettled(lines.map(line => apiFetch(`/cart/${line.id}`, { method: 'DELETE' })));
+          document.getElementById('orderMessage').textContent = `Order reference: ${result.order_id}. You can view its status in your orders.`;
+          document.getElementById('successModal').hidden = false;
+          document.getElementById('viewOrders').focus();
+        } catch (error) { statusMessage.textContent = error.message; payButton.textContent = 'Please contact support'; }
+      }
+    });
+    payment.on('payment.failed', () => { if (recordingOrder || orderCompleted) return; setBusy(false); statusMessage.textContent = 'Payment was not completed. Check its status before trying again.'; });
+    payment.open();
+  } catch (error) { setBusy(false); statusMessage.textContent = error.message; }
+});
+initializeCheckout();
