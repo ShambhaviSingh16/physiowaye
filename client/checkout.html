@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout | PhysioWaye</title>
 <link rel="stylesheet" href="css/style.css?v=frontend-12">
-<link rel="stylesheet" href="css/checkout.css?v=checkout-1">
+<link rel="stylesheet" href="css/checkout.css?v=checkout-2">
 </head>
 <body class="checkout-page">
 <header class="checkout-header"><a href="index.html" aria-label="PhysioWaye home"><img src="assets/images/logo.png" alt="PhysioWaye"></a><span class="checkout-header-note">Your order, one step closer</span><a href="cart.html">Back to cart</a></header>
@@ -24,7 +24,6 @@
 <label>State / Union territory<input id="state" autocomplete="address-level1" required placeholder="State" maxlength="100"></label>
 </div></section>
 <section class="checkout-panel"><div class="checkout-panel-title"><span class="checkout-number">02</span><div><h2>Review your items</h2><p id="reviewCount">Loading your order…</p></div><a id="editBag" href="cart.html">Edit bag</a></div><div id="orderSummary" aria-live="polite" aria-busy="true"><div class="checkout-loading">Loading products and prices…</div></div></section>
-<section class="checkout-panel"><div class="checkout-panel-title"><span class="checkout-number">03</span><div><h2>Payment</h2><p>Choose your payment method in the next window.</p></div></div><div class="checkout-payment"><span class="checkout-payment-mark" aria-hidden="true">₹</span><div><strong>Pay online with Razorpay</strong><p>Available payment options appear when you continue.</p></div><span class="checkout-payment-selected" aria-hidden="true">✓</span></div></section>
 </div>
 <aside class="checkout-sidebar"><section class="checkout-panel checkout-price-panel"><h2>Order summary</h2><div class="checkout-totals"><div><span id="subtotalLabel">Item subtotal</span><strong id="subtotal">—</strong></div><div id="savingsRow" hidden><span>Product savings</span><strong id="savings">—</strong></div><div><span>Additional charges</span><strong>₹0</strong></div></div><div class="checkout-total"><span>Total payable</span><strong id="grandTotal">—</strong></div><p class="checkout-price-note">Review this total before continuing to payment.</p><button id="payButton" class="checkout-pay-button" type="submit" disabled>Continue to payment <span aria-hidden="true">→</span></button><p id="checkoutStatus" role="status" aria-live="polite"></p><p class="checkout-payment-note">You’ll complete payment in the Razorpay window.</p></section><div class="checkout-help"><strong>A question about your order?</strong><p>Our team can help with products and ordering.</p><a href="https://wa.me/919540043453" target="_blank" rel="noopener noreferrer">Talk to our agent ↗</a></div></aside>
 </form>
