@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders</title>
 
-    <link rel="stylesheet" href="css/style.css?v=frontend-5">
-    <link rel="stylesheet" href="css/responsive.css?v=frontend-5">
+    <link rel="stylesheet" href="css/style.css?v=frontend-12">
+    <link rel="stylesheet" href="css/responsive.css?v=frontend-12">
+<link rel="stylesheet" href="css/orders.css?v=orders-1">
 </head>
 
 <body>
@@ -15,7 +16,7 @@
         <div class="nav-container">
 
             <div class="logo-wrapper">
-                <img src="assets/images/logo.png" class="logo">
+                <img src="assets/images/logo.png" class="logo" alt="PhysioWaye">
             </div>
 
             <nav class="nav-links" id="navLinks">
@@ -53,20 +54,19 @@
 
         </div>
     </header>
-    <main class="orders-container">
-        <span class="eyebrow">ACCOUNT</span>
-        <h1>Your orders</h1>
-        <p class="orders-intro">Review your purchases and their current status.</p>
-        <p id="ordersStatus" class="form-status" role="status" aria-live="polite">Loading your ordersâ€¦</p>
-        <div id="ordersList" class="orders-list"></div>
-
+    <main class="orders-hub">
+      <div class="orders-heading"><div><span class="eyebrow">YOUR ACCOUNT</span><h1>Every order, at a glance.</h1><p>Your equipment, payment details and delivery updates — all in one place.</p></div><a class="orders-shop" href="products.html">Explore equipment <span aria-hidden="true">↗</span></a></div>
+      <section class="orders-toolbar" aria-label="Find an order"><label class="order-search"><span>Search your orders</span><input id="orderSearch" type="search" placeholder="Product name or order reference"></label><label><span>Order status</span><select id="orderFilter"><option value="all">All orders</option><option value="active">In progress</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></label></section>
+      <div class="orders-list-heading"><h2>Order history</h2><p id="ordersStatus" role="status" aria-live="polite">Loading your orders…</p></div>
+      <div id="ordersList" class="orders-feed" aria-busy="true"></div>
+      <div class="orders-support"><div><strong>We’re here for your next step.</strong><p>Need help with equipment or an existing order?</p></div><a href="https://wa.me/919540043453" target="_blank" rel="noopener noreferrer">Talk to our agent ↗</a></div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/orders.js"></script>
+    <script src="js/orders.js?v=orders-1"></script>
     <script src="js/main.js"></script>
 
 </body>

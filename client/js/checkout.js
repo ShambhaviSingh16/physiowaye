@@ -76,7 +76,7 @@ form.addEventListener('submit', async event => {
     if (!lines.length) throw new Error('Your bag is empty.');
     const total = renderLines(lines);
     const items = lines.map(line => ({ id: line.products.id, qty: Number(line.quantity), price: Number(line.products.selling_price) }));
-    const response = await apiFetch('/create-razorpay-order', { method: 'POST', body: JSON.stringify({ amount: total }) });
+    const response = await apiFetch('/create-razorpay-order', { method: 'POST', body: JSON.stringify({ items: items.map(({ id, qty }) => ({ id, qty })), delivery: Object.fromEntries(['name', 'email', 'phone', 'pincode', 'address', 'city', 'state'].map(field => [field, document.getElementById(field).value.trim()])) }) });
     const paymentOrder = await response.json().catch(() => ({}));
     if (!response.ok) {
       console.error('Payment order request failed', { status: response.status, code: paymentOrder.code, error: paymentOrder.error });
@@ -85,20 +85,25 @@ form.addEventListener('submit', async event => {
     }
     if (!window.Razorpay || !paymentOrder.id) throw new Error('Payment is unavailable. Please refresh and try again.');
     const payment = new Razorpay({
-      key: paymentOrder.key_id || 'rzp_test_T51j3XaiQx5sos', amount: paymentOrder.amount, currency: 'INR', name: 'PhysioWaye', description: 'Equipment order', order_id: paymentOrder.id,
+      key: paymentOrder.key_id, amount: paymentOrder.amount, currency: 'INR', name: 'PhysioWaye', description: 'Equipment order', order_id: paymentOrder.id,
       prefill: { name: document.getElementById('name').value.trim(), email: document.getElementById('email').value.trim(), contact: document.getElementById('phone').value.trim() },
       theme: { color: '#158ec1' },
       modal: { ondismiss: () => { if (recordingOrder || orderCompleted) return; setBusy(false); statusMessage.textContent = 'Payment was closed. You can continue when you are ready.'; } },
-      handler: async function () {
+      handler: async function (paymentResult) {
         recordingOrder = true; payButton.textContent = 'Confirming your order…';
         try {
-          const orderResponse = await apiFetch('/orders', { method: 'POST', body: JSON.stringify({ items, total_amount: total }) });
+          const orderResponse = await apiFetch('/orders', { method: 'POST', body: JSON.stringify(paymentResult) });
           const result = await orderResponse.json();
-          if (!orderResponse.ok || !result.success) throw new Error('Payment completed, but the order could not be recorded. Contact support before making another payment.');
+          if (!orderResponse.ok || !result.success) throw new Error((result.error || 'Payment completed, but the order could not be recorded.') + ' Payment reference: ' + paymentResult.razorpay_payment_id);
           orderCompleted = true;
           if (!buyNowProductId) await Promise.allSettled(lines.map(line => apiFetch(`/cart/${line.id}`, { method: 'DELETE' })));
-          document.getElementById('orderMessage').textContent = `Order reference: ${result.order_id}. You can view its status in your orders.`;
+          document.getElementById('orderMessage').textContent = `Your equipment is one step closer. We’ve verified your payment and confirmed your order.`;
+          document.getElementById('successReference').textContent = result.reference;
+          document.getElementById('successTotal').textContent = money.format(result.total);
+          document.getElementById('viewOrders').href = `orders.html?order=${encodeURIComponent(result.reference)}`;
           document.getElementById('successModal').hidden = false;
+          document.querySelector('.checkout-shell').inert = true;
+          document.querySelector('.checkout-header').inert = true;
           document.getElementById('viewOrders').focus();
         } catch (error) { statusMessage.textContent = error.message; payButton.textContent = 'Please contact support'; }
       }
@@ -108,3 +113,6 @@ form.addEventListener('submit', async event => {
   } catch (error) { setBusy(false); statusMessage.textContent = error.message; }
 });
 initializeCheckout();
+document.getElementById('successModal').addEventListener('keydown', event => {
+  if (event.key === 'Tab') { event.preventDefault(); document.getElementById('viewOrders').focus(); }
+});

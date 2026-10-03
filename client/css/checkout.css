@@ -23,3 +23,6 @@
   .checkout-fields { grid-template-columns: 1fr; }
   .checkout-field-wide { grid-column: auto; }
 }
+
+/* Order receipt */
+.checkout-success-box{max-width:540px!important;width:calc(100% - 32px);max-height:90vh;overflow:auto}.checkout-success-check{box-shadow:0 0 0 12px #f0faf5}.success-receipt{text-align:left;background:#f5f9fc;border:1px solid #dbe9f0;border-radius:14px;padding:20px;margin:24px 0 18px}.success-receipt>span{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#687e91}.success-receipt>strong{display:block;font-size:13px;overflow-wrap:anywhere;color:#253b53;margin:9px 0 18px}.success-receipt>div{border-top:1px dashed #cbdae4;display:flex;justify-content:space-between;gap:12px;padding-top:16px;font-size:13px}.success-receipt>div>span{color:#237958}.success-next{font-size:12px!important;line-height:1.8;margin-bottom:22px!important}@media(max-width:480px){.checkout-success-box{padding:28px 20px!important}.success-receipt{padding:16px}}
