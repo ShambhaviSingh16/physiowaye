@@ -285,7 +285,9 @@ document
   .getElementById("logoutBtn")
   ?.addEventListener(
     "click",
-    async () => {
+    async (event) => {
+
+      event.preventDefault();
 
       await supabaseClient.auth.signOut();
 

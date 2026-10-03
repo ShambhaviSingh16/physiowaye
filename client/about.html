@@ -6,7 +6,7 @@
   <title>About | PhysioWaye</title>
   <link rel="stylesheet" href="css/style.css?v=frontend-11">
   <link rel="stylesheet" href="css/responsive.css?v=frontend-11">
-  <link rel="stylesheet" href="css/refinements.css?v=design-1">
+  <link rel="stylesheet" href="css/refinements.css?v=design-2">
 </head>
 <body class="page-about">
 
@@ -24,15 +24,15 @@
   <a href="about.html" aria-current="page">About</a>
   <a href="contact.html">Contact</a>
 
-  <!-- Login -->
-  <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+  
+  <a href="login.html" id="loginBtn" class="login-btn hidden">Login</a>
 
   
-<!-- Cart (hidden by default) -->
+  
   <a href="cart.html" id="cartBtn" class="cart-btn hidden">
     <svg class="nav-cart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.1a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H6"/><circle cx="10" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/></svg> Cart <span id="cartCount" class="cart-count">0</span>
   </a>
-  <a href="orders.html"
+<a href="orders.html"
    id="ordersBtn"
    class="hidden">
    Orders
@@ -42,6 +42,7 @@
    class="hidden">
    Profile
 </a>
+
 <a href="index.html" id="logoutBtn" class="login-btn hidden">Logout</a>
 </nav>
 
@@ -129,8 +130,13 @@
 </footer>
 
 <script src="js/footer.js"></script>
-</body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js?v=nav-2"></script>
+
 <script src="js/main.js"></script>
+</body>
 </html>
 
 

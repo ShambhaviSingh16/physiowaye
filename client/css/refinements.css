@@ -1,4 +1,30 @@
 /* Shared finish for the existing shopping flows. */
+/* Contact surface colors are explicit so shared card rules cannot wash out text. */
+.page-contact .contact-page{max-width:1180px;margin:auto;padding:46px 24px 48px}
+.page-contact .contact-layout{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:28px;align-items:stretch}
+.page-contact .contact-intro{padding:32px;border-radius:22px;background:linear-gradient(145deg,#18374f,#236981)}
+.page-contact .contact-intro h1{color:#fff;font-size:clamp(30px,3.3vw,42px);line-height:1.2;margin:14px 0 18px}
+.page-contact .contact-intro>p{color:#d8eaf2;font-size:14px;line-height:1.85}
+.page-contact .contact-intro .eyebrow{color:#94e0f4;font-size:11px;letter-spacing:1.7px}
+.page-contact .contact-channels{margin-top:26px;gap:10px}
+.page-contact .contact-channel{color:#233f53;background:#fff;border:1px solid #dce8ef;padding:15px;gap:14px;font-size:14px;line-height:1.5}
+.page-contact .contact-channel>span:last-child{min-width:0;overflow-wrap:anywhere}
+.page-contact .contact-channel small{color:#567487;font-size:10px;font-weight:650;letter-spacing:.9px;margin-bottom:4px}
+.page-contact .contact-channel-icon{background:#eaf4f8;color:#1b7b9a;font-size:18px;width:40px;height:40px;flex-basis:40px}
+.page-contact .contact-channel[href]:hover{background:#eef8fc;color:#163a50;border-color:#a6d9e8;transform:translateX(2px)}
+.page-contact .contact-channel[href^="https://wa.me"]{border-left:4px solid #168d58}
+.page-contact .contact-channel[href^="https://wa.me"] .contact-channel-icon{background:#168d58;color:white}
+.page-contact .contact-form-card{padding:32px;border-radius:22px;display:flex;flex-direction:column}
+.page-contact .contact-form-card h2{font-size:24px;letter-spacing:-.5px;margin-bottom:10px}
+.page-contact .contact-form-card>p{font-size:14px;line-height:1.8;margin-bottom:26px}
+.page-contact .contact-form{display:grid;gap:20px}
+.page-contact .contact-form .form-group{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0}
+.page-contact .contact-form label{font-size:12px;color:#344e63;margin-bottom:8px}
+.page-contact .contact-form textarea{height:160px;min-height:140px}
+.page-contact .contact-form .btn-primary{margin:0;width:100%;justify-content:center;border:0;font-size:14px;font-weight:650;cursor:pointer}
+.page-contact .contact-form .contact-form-note{color:#617a8b;font-size:12px;line-height:1.7;margin:0;padding:12px 15px;border-radius:10px;background:#f0f6f9}
+@media(max-width:800px){.page-contact .contact-layout{grid-template-columns:1fr;gap:20px}.page-contact .contact-channels{grid-template-columns:1fr 1fr}.page-contact .contact-intro,.page-contact .contact-form-card{padding:28px}}
+@media(max-width:480px){.page-contact .contact-page{padding:24px 16px 30px}.page-contact .contact-intro,.page-contact .contact-form-card{padding:24px 20px}.page-contact .contact-channels,.page-contact .contact-form .form-group{grid-template-columns:1fr}.page-contact .contact-intro h1{font-size:32px}}
 :root{--finish-ink:#19344a;--finish-blue:#148cb5;--finish-border:#dde8ee}
 body{background:#f3f7fa}button,input,textarea,select{font-family:inherit}a,button{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-visible{outline:3px solid #58b8d6;outline-offset:4px}input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #58b8d6;outline-offset:2px}
 .navbar{border-bottom:1px solid #e3ebf0;box-shadow:0 4px 22px #19344a05}.nav-links a[aria-current=page]{color:#0783af}.nav-links .login-btn{border-radius:12px}.btn-primary{border-radius:12px;box-shadow:0 6px 16px #168db51a;transition:background .2s,box-shadow .2s,transform .2s}.btn-primary:hover{box-shadow:0 9px 22px #168db52a;transform:translateY(-1px)}.eyebrow{color:#148cb5}.site-footer{margin-top:28px}.footer-cta{box-shadow:inset 0 1px 0 #ffffff10}.footer-column a:hover{color:#9adef4}
