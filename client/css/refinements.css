@@ -1,4 +1,5 @@
 /* Shared finish for the existing shopping flows. */
+.nav-links .hidden{display:none!important}
 /* Contact surface colors are explicit so shared card rules cannot wash out text. */
 .page-contact .contact-page{max-width:1180px;margin:auto;padding:46px 24px 48px}
 .page-contact .contact-layout{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:28px;align-items:stretch}
