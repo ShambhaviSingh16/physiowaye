@@ -1,21 +1,13 @@
-﻿<!-- <section class="product-details">
-  <div class="product-card"> -->
-
-
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login | PhysioWaye</title>
-  <link rel="stylesheet" href="css/style.css?v=frontend-5">
-  <link rel="stylesheet" href="css/responsive.css?v=frontend-5">
-  <link rel="stylesheet" href="css/refinements.css?v=design-2">
-</head>
-
-<body class="page-login">
-  <header class="navbar">
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | PhysioWaye</title>
+<link rel="stylesheet" href="css/style.css?v=frontend-12">
+<link rel="stylesheet" href="css/responsive.css?v=frontend-12">
+<link rel="stylesheet" href="css/refinements.css?v=design-2">
+<link rel="stylesheet" href="css/access.css?v=access-1">
+</head><body class="page-login">
+<header class="navbar">
     <div class="nav-container">
 
       <div class="logo-wrapper">
@@ -60,120 +52,24 @@
 
     </div>
   </header>
-
-  <!-- 
-<div class="auth-box">
-  <h1>Customer Login</h1>
-
-  <input type="email" id="email" placeholder="Email Address">
-  <input type="password" id="password" placeholder="Password">
-
-  <button onclick="login()">Login</button>
-
-<div style="margin:15px 0;text-align:center;">
-  OR
-</div>
-
-<button onclick="googleLogin()"
-        style="background:#fff;color:#000;border:1px solid #ccc;">
-  Continue with Google
-</button>
-
-  <p id="loginError" style="color:red;"></p>
-
-  <p>New user?
-    <a href="register.html">Create an account</a>
-  </p>
-</div> -->
-
-  <section class="auth-section">
-<div class="floating-circle circle1"></div>
-      <div class="floating-circle circle2"></div>
-      <div class="floating-circle circle3"></div>
-    <div class="auth-left">
-
-      <!-- <img src="assets/images/logo.png" alt="logo"> -->
-
-      <h2>Premium Physiotherapy Equipment</h2>
-
-      <p>
-        Trusted by clinics, hospitals and rehabilitation centers across India.
-      </p>
-
-      <div class="auth-features">
-        <!-- <div>âœ“ Medical Grade Equipment</div>
-            <div>âœ“ Secure Ordering</div>
-            <div>âœ“ Fast Delivery</div>
-            <div>âœ“ Expert Support</div> -->
-        <div class="feature-item">
-          ðŸ¥ Medical Grade Equipment
-        </div>
-
-        <div class="feature-item">
-          ðŸ”’ Secure Ordering
-        </div>
-
-        <div class="feature-item">
-          ðŸšš Fast Delivery
-        </div>
-
-        <div class="feature-item">
-          ðŸŽ§ Expert Support
-        </div>
-      </div>
-    </div>
-
-    <div class="auth-card">
-            <h1>Welcome Back</h1>
-      <p>Login to continue shopping</p>
-
-      <form id="loginForm">
-
-        <input type="email" id="email" placeholder="Email Address" required>
-
-        <input type="password" id="password" placeholder="Password" required>
-
-        <button type="submit" class="auth-btn">
-          Login
-        </button>
-
-      </form>
-      <p id="loginError" style="color:red"></p>
-
-      <div class="divider">
-        <span>OR</span>
-      </div>
-
-      <button id="googleLoginBtn" class="google-btn">
-    <img
-        src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-        alt="Google"
-    >
-    <span>Continue with Google</span>
-</button>
-
-      
-
-      <p class="auth-link">
-        New User?
-        <a href="register.html">Create Account</a>
-      </p>
-
-    </div>
-
-  </section>
-
-</body>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-client.js"></script>
-<script src="js/api.js"></script>
-<script src="js/auth.js?v=nav-2"></script>
-<script src="js/main.js"></script>
-
-</html>
-
-
-
-
-
-
+<main class="access-shell">
+<section class="access-story" aria-labelledby="accessStoryTitle">
+ <div class="access-story-copy"><span class="access-kicker">CARE STARTS HERE</span><h2 id="accessStoryTitle">The right equipment.<br>A simpler journey.</h2><p>Find equipment for your clinic or home, and keep your purchases together in one place.</p><ul><li><span aria-hidden="true">01</span> Explore therapy equipment</li><li><span aria-hidden="true">02</span> Review your orders and delivery updates</li><li><span aria-hidden="true">03</span> Reach our team when you need help</li></ul></div>
+ <div class="access-photo"><img src="assets/images/home/clinic-hero.jpg" alt="Physiotherapist speaking with a patient in a rehabilitation clinic"><div><span>PHYSIOWAYE</span><p>For clinics. For home. For your next step.</p></div></div>
+</section>
+<section class="access-form-panel" aria-labelledby="accessTitle">
+ <div class="access-form-heading"><span class="access-kicker">YOUR PHYSIOWAYE ACCOUNT</span><h1 id="accessTitle">Welcome back.</h1><p>Sign in to continue your equipment journey.</p></div>
+ <form id="loginForm" class="access-form">
+ 
+ <label for="email">Email address<input type="email" id="email" autocomplete="email" placeholder="you@example.com" required></label>
+ <label for="password">Password<input type="password" id="password" autocomplete="current-password" placeholder="Enter your password" required></label>
+ <button type="submit" class="access-submit">Sign in <span aria-hidden="true">&rarr;</span></button>
+ </form>
+ <p id="loginError" class="access-error" role="alert" aria-live="polite"></p>
+ <div class="access-divider"><span>or continue with</span></div><button type="button" id="googleLoginBtn" class="access-google"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" width="20" height="20">Google</button>
+ <p class="access-alternate">New to PhysioWaye? <a href="register.html">Create an account &rarr;</a></p>
+ <div class="access-bottom-note">Equipment for clinics and home care.<br><span>One account. Your orders in one place.</span></div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase-client.js"></script><script src="js/api.js"></script><script src="js/auth.js?v=nav-2"></script><script src="js/main.js"></script>
+</body></html>

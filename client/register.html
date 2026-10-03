@@ -1,16 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register | PhysioWaye</title>
-  <link rel="stylesheet" href="css/style.css?v=frontend-5">
-  <link rel="stylesheet" href="css/responsive.css?v=frontend-5">
-  <link rel="stylesheet" href="css/refinements.css?v=design-2">
-</head>
-<body class="page-register">
-
-    <header class="navbar">
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register | PhysioWaye</title>
+<link rel="stylesheet" href="css/style.css?v=frontend-12">
+<link rel="stylesheet" href="css/responsive.css?v=frontend-12">
+<link rel="stylesheet" href="css/refinements.css?v=design-2">
+<link rel="stylesheet" href="css/access.css?v=access-1">
+</head><body class="page-register">
+<header class="navbar">
     <div class="nav-container">
 
       <div class="logo-wrapper">
@@ -55,99 +52,24 @@
 
     </div>
   </header>
-
-<!-- <div class="auth-box">
-  <h1>Create Account</h1>
-
-  <input type="text" id="name" placeholder="Full Name">
-  <input type="email" id="email" placeholder="Email Address">
-  <input type="password" id="password" placeholder="Password (min 6 chars)">
-
-  <button onclick="register()">Register</button>
-
-  <p id="error" style="color:red;"></p>
-
-  <p>Already have an account?
-    <a href="login.html">Login</a>
-  </p>
-</div> -->
-
-<section class="auth-section">
-<div class="floating-circle circle1"></div>
-<div class="floating-circle circle2"></div>
-<div class="floating-circle circle3"></div>
-    <div class="auth-left">
-
-        <!-- <img src="assets/images/logo.png" alt="logo"> -->
-
-        <h2>Join PhysioWaye</h2>
-
-        <p>
-            Access premium physiotherapy products and manage your orders easily.
-        </p>
-
-        <div class="auth-features">
-            <div>âœ“ Trusted Products</div>
-            <div>âœ“ Secure Checkout</div>
-            <div>âœ“ Easy Order Tracking</div>
-            <div>âœ“ Customer Support</div>
-        </div>
-
-    </div>
-
-    <div class="auth-card">
-
-        <h1>Create Account</h1>
-
-        <form id="registerForm">
-
-            <input
-                type="text"
-                id="name"
-                placeholder="Full Name"
-                required
-            >
-
-            <input
-                type="email"
-                id="email"
-                placeholder="Email Address"
-                required
-            >
-
-            <input
-                type="password"
-                id="password"
-                placeholder="Password"
-                required
-            >
-
-            <button type="submit" class="auth-btn">
-                Register
-            </button>
-
-        </form>
-
-        <p id="error" style="color:red"></p>
-        <p class="auth-link">
-            Already have an account?
-            <a href="login.html">Login</a>
-        </p>
-
-    </div>
-
+<main class="access-shell">
+<section class="access-story" aria-labelledby="accessStoryTitle">
+ <div class="access-story-copy"><span class="access-kicker">CARE STARTS HERE</span><h2 id="accessStoryTitle">The right equipment.<br>A simpler journey.</h2><p>Find equipment for your clinic or home, and keep your purchases together in one place.</p><ul><li><span aria-hidden="true">01</span> Explore therapy equipment</li><li><span aria-hidden="true">02</span> Review your orders and delivery updates</li><li><span aria-hidden="true">03</span> Reach our team when you need help</li></ul></div>
+ <div class="access-photo"><img src="assets/images/home/clinic-hero.jpg" alt="Physiotherapist speaking with a patient in a rehabilitation clinic"><div><span>PHYSIOWAYE</span><p>For clinics. For home. For your next step.</p></div></div>
 </section>
-
-</body>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-client.js"></script>
-<script src="js/api.js"></script>
-<script src="js/auth.js?v=nav-2"></script>
-<script src="js/main.js"></script>
-</html>
-
-
-
-
-
-
+<section class="access-form-panel" aria-labelledby="accessTitle">
+ <div class="access-form-heading"><span class="access-kicker">JOIN PHYSIOWAYE</span><h1 id="accessTitle">Create your account</h1><p>A little about you, and you are ready to explore.</p></div>
+ <form id="registerForm" class="access-form">
+ <label for="name">Full name<input type="text" id="name" autocomplete="name" placeholder="Your full name" required></label>
+ <label for="email">Email address<input type="email" id="email" autocomplete="email" placeholder="you@example.com" required></label>
+ <label for="password">Password<input type="password" id="password" autocomplete="new-password" placeholder="Choose your password" required></label>
+ <button type="submit" class="access-submit">Create account <span aria-hidden="true">&rarr;</span></button>
+ </form>
+ <p id="error" class="access-error" role="alert" aria-live="polite"></p>
+ 
+ <p class="access-alternate">Already have an account? <a href="login.html">Sign in &rarr;</a></p>
+ <div class="access-bottom-note">Equipment for clinics and home care.<br><span>One account. Your orders in one place.</span></div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase-client.js"></script><script src="js/api.js"></script><script src="js/auth.js?v=nav-2"></script><script src="js/main.js"></script>
+</body></html>
