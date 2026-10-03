@@ -2,6 +2,8 @@ const list = document.getElementById('ordersList'), ordersStatus = document.getE
 const search = document.getElementById('orderSearch'), filter = document.getElementById('orderFilter');
 const currency = new Intl.NumberFormat('en-IN', { style:'currency', currency:'INR', maximumFractionDigits:2 });
 let orders = [];
+const isOrderDetail = document.body.classList.contains('order-detail-page');
+const selectedReference = new URLSearchParams(location.search).get('order');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function date(value) {
   if (!value) return 'Not available';
@@ -29,19 +31,37 @@ function renderOrder(order) {
   const count = items.reduce((sum,item) => sum + Number(item.qty || 0),0);
   const method = payment ? [{card:'Card',upi:'UPI',netbanking:'Netbanking',wallet:'Wallet',emi:'EMI',paylater:'Pay later'}[payment.method] || 'Online payment',payment.card_network,payment.card_last4 ? `•••• ${payment.card_last4}` : payment.bank || payment.wallet].filter(Boolean).join(' · ') : 'Payment record unavailable';
   const card = document.createElement('article'); card.className = 'purchase-card';
-  card.innerHTML = `<header class="purchase-header"><div><span class="order-micro">ORDER REFERENCE</span><strong class="public-reference">${esc(reference)}</strong><p>Placed ${esc(date(order.created_at))}</p></div><div class="order-badges"><span>${esc(order.status || 'Pending')}</span><span class="payment-badge ${payment?.status === 'Paid' ? 'is-paid' : ''}">${payment?.status === 'Paid' ? '✓ Paid' : 'Payment unverified'}</span>${details.test_mode ? '<span class="test-badge">Test order</span>' : ''}</div></header><div class="purchase-products">${items.length ? items.map(itemHTML).join('') : '<p>Product details are unavailable for this earlier order.</p>'}</div><div class="purchase-bottom"><div><span>${count || '—'} items · Order total</span><strong>${currency.format(total)}</strong></div><div class="order-actions"><button type="button" data-action="details" aria-expanded="false">View order details ↓</button><button type="button" data-action="track" aria-expanded="false">Track order →</button></div></div><div class="purchase-detail" hidden><div class="order-section-heading"><h3>Order details</h3><button type="button" class="close-detail">Close ↑</button></div><div class="order-detail-grid"><section><h4>Delivery address</h4>${delivery ? `<strong>${esc(delivery.name)}</strong><p>${esc(delivery.address)}<br>${esc(delivery.city)}, ${esc(delivery.state)} ${esc(delivery.pincode)}</p><p>${esc(delivery.phone)}<br>${esc(delivery.email)}</p>` : '<p>Delivery details were not saved for this earlier order.</p>'}</section><section><h4>Payment details</h4><strong>${esc(method)}</strong><p>${payment ? `Status: ${esc(payment.status)}<br>Verified ${esc(date(payment.verified_at))}` : 'This earlier order has no verified payment record.'}</p>${payment ? `<span class="order-micro">PAYMENT REFERENCE</span><p>${esc(payment.id)}</p>` : ''}${details.test_mode ? '<small>Test Mode · No real money was charged.</small>' : ''}</section><section class="price-breakup"><h4>Price breakdown</h4><div><span>Items subtotal</span><b>${currency.format(subtotal)}</b></div>${details.shipping != null ? `<div><span>Delivery charges</span><b>${currency.format(details.shipping)}</b></div>` : ''}${Math.abs(total-subtotal-Number(details.shipping || 0)) > .01 ? `<div><span>Other recorded charges</span><b>${currency.format(total-subtotal-Number(details.shipping || 0))}</b></div>` : ''}<div class="breakup-total"><span>Order total</span><b>${currency.format(total)}</b></div>${savings ? `<p class="saved-amount">You saved ${currency.format(savings)} on these products.</p>` : ''}</section></div><a class="order-help-link" href="https://wa.me/919540043453?text=${encodeURIComponent(`Hi PhysioWaye, I need help with order ${reference}.`)}" target="_blank" rel="noopener noreferrer">Need help with this order? Chat with us ↗</a></div><div class="purchase-tracking" hidden>${trackingHTML(order)}<button type="button" class="close-tracking">Close tracking ↑</button></div>`;
+  card.innerHTML = `<header class="purchase-header"><div><span class="order-micro">ORDER REFERENCE</span><strong class="public-reference">${esc(reference)}</strong><p>Placed ${esc(date(order.created_at))}</p></div><div class="order-badges"><span>${esc(order.status || 'Pending')}</span><span class="payment-badge ${payment?.status === 'Paid' ? 'is-paid' : ''}">${payment?.status === 'Paid' ? '✓ Paid' : 'Payment unverified'}</span>${details.test_mode ? '<span class="test-badge">Test order</span>' : ''}</div></header><div class="purchase-products">${items.length ? items.map(itemHTML).join('') : '<p>Product details are unavailable for this earlier order.</p>'}</div><div class="purchase-bottom"><div><span>${count || '—'} ${count === 1 ? 'item' : 'items'} · Order total</span><strong>${currency.format(total)}</strong></div><div class="order-actions"><button type="button" data-action="details" aria-expanded="false">View order details ↓</button><button type="button" data-action="track" aria-expanded="false">Track order →</button></div></div><div class="purchase-detail" hidden><div class="order-section-heading"><h3>Order details</h3><button type="button" class="close-detail">Close ↑</button></div><div class="order-detail-grid"><section><h4>Delivery address</h4>${delivery ? `<strong>${esc(delivery.name)}</strong><p>${esc(delivery.address)}<br>${esc(delivery.city)}, ${esc(delivery.state)} ${esc(delivery.pincode)}</p><p>${esc(delivery.phone)}<br>${esc(delivery.email)}</p>` : '<p>Delivery details were not saved for this earlier order.</p>'}</section><section><h4>Payment details</h4><strong>${esc(method)}</strong><p>${payment ? `Status: ${esc(payment.status)}<br>Verified ${esc(date(payment.verified_at))}` : 'This earlier order has no verified payment record.'}</p>${payment ? `<span class="order-micro">PAYMENT REFERENCE</span><p>${esc(payment.id)}</p>` : ''}${details.test_mode ? '<small>Test Mode · No real money was charged.</small>' : ''}</section><section class="price-breakup"><h4>Price breakdown</h4><div><span>Items subtotal</span><b>${currency.format(subtotal)}</b></div>${details.shipping != null ? `<div><span>Delivery charges</span><b>${currency.format(details.shipping)}</b></div>` : ''}${Math.abs(total-subtotal-Number(details.shipping || 0)) > .01 ? `<div><span>Other recorded charges</span><b>${currency.format(total-subtotal-Number(details.shipping || 0))}</b></div>` : ''}<div class="breakup-total"><span>Order total</span><b>${currency.format(total)}</b></div>${savings ? `<p class="saved-amount">You saved ${currency.format(savings)} on these products.</p>` : ''}</section></div><a class="order-help-link" href="https://wa.me/919540043453?text=${encodeURIComponent(`Hi PhysioWaye, I need help with order ${reference}.`)}" target="_blank" rel="noopener noreferrer">Need help with this order? Chat with us ↗</a></div><div class="purchase-tracking" hidden>${trackingHTML(order)}<button type="button" class="close-tracking">Close tracking ↑</button></div>`;
+  const href = `order.html?order=${encodeURIComponent(reference)}`;
   const detail = card.querySelector('.purchase-detail'), track = card.querySelector('.purchase-tracking');
-  const detailButton = card.querySelector('[data-action="details"]'), trackButton = card.querySelector('[data-action="track"]');
-  function toggle(panel,button,force) { panel.hidden = force == null ? !panel.hidden : !force; button.setAttribute('aria-expanded',String(!panel.hidden)); }
-  detailButton.onclick = () => toggle(detail,detailButton);
-  trackButton.onclick = () => { toggle(track,trackButton); if (!track.hidden) track.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto':'smooth',block:'nearest'}); };
-  card.querySelector('.close-detail').onclick = () => { toggle(detail,detailButton,false); detailButton.focus(); };
-  card.querySelector('.close-tracking').onclick = () => { toggle(track,trackButton,false); trackButton.focus(); };
+  if (isOrderDetail) {
+    detail.hidden = false; track.hidden = false; track.id = 'tracking';
+    card.querySelector('.order-actions').remove();
+    card.querySelector('.close-detail').remove(); card.querySelector('.close-tracking').remove();
+  } else {
+    detail.remove(); track.remove();
+    card.classList.add('order-preview');
+    card.querySelectorAll('.product-overview').forEach(node => node.remove());
+    card.querySelectorAll('.order-product a').forEach(link => { link.href = href; });
+    const actions = card.querySelector('.order-actions');
+    actions.innerHTML = `<a class="order-detail-link" href="${href}">View order details &rarr;</a><a href="${href}#tracking">Track order &rarr;</a>`;
+    const overlay = document.createElement('a'); overlay.className = 'order-card-link'; overlay.href = href;
+    overlay.setAttribute('aria-label', `View details for order ${reference}`); card.append(overlay);
+  }
   card.querySelectorAll('.order-product img').forEach(img => { img.onerror = () => { img.onerror = null; img.src = 'assets/images/logo.png'; }; });
-  if (new URLSearchParams(location.search).get('order') === order.reference) toggle(detail,detailButton,true);
   return card;
 }
 function render() {
+  if (isOrderDetail) {
+    const order = orders.find(order => order.reference === selectedReference);
+    list.replaceChildren();
+    if (!order) { ordersStatus.textContent = 'This order could not be found in your account.'; return; }
+    ordersStatus.textContent = 'Your items, payment and delivery information.';
+    list.append(renderOrder(order));
+    if (location.hash === '#tracking') requestAnimationFrame(() => document.getElementById('tracking').scrollIntoView({ block: 'start' }));
+    return;
+  }
+  try { sessionStorage.setItem('physiowaye_order_filters', JSON.stringify({ search: search.value, filter: filter.value })); } catch (_) { /* Filters still work when browser storage is unavailable. */ }
   const query = search.value.trim().toLowerCase();
   const visible = orders.filter(order => {
     const status = String(order.status || 'Pending').toLowerCase();
@@ -58,9 +78,11 @@ async function loadOrders() {
   try {
     const {data:{session}} = await supabaseClient.auth.getSession();
     if (!session) { location.replace('login.html'); return; }
-    const response = await apiFetch(`/orders/${encodeURIComponent(session.user.id)}`);
+    const response = await apiFetch(isOrderDetail ? `/orders/detail/${encodeURIComponent(selectedReference || '')}` : `/orders/${encodeURIComponent(session.user.id)}`);
+    if (response.status === 404 && isOrderDetail) { ordersStatus.textContent = 'This order could not be found in your account.'; list.replaceChildren(); return; }
     if (!response.ok) throw new Error('Unable to load orders');
-    orders = await response.json();
+    const result = await response.json();
+    orders = isOrderDetail ? [result] : result;
     if (!Array.isArray(orders)) throw new Error('Invalid orders response');
     render();
   } catch (_) {
@@ -69,4 +91,9 @@ async function loadOrders() {
     document.getElementById('retryOrders').onclick = loadOrders;
   } finally { list.setAttribute('aria-busy','false'); }
 }
-search.addEventListener('input',render); filter.addEventListener('change',render); loadOrders();
+if (!isOrderDetail) {
+  if (selectedReference) location.replace(`order.html?order=${encodeURIComponent(selectedReference)}${location.hash}`);
+  try { const saved = JSON.parse(sessionStorage.getItem('physiowaye_order_filters') || '{}'); search.value = saved.search || ''; filter.value = saved.filter || 'all'; } catch (_) {}
+  search.addEventListener('input',render); filter.addEventListener('change',render);
+}
+loadOrders();

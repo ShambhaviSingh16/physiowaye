@@ -1,5 +1,15 @@
 # Deploy the order experience
 
+## Order detail navigation
+
+`orders.html` displays compact order cards with search and status filters.
+Each card and its View order details link open `order.html?order=PUBLIC_REFERENCE`.
+Track order opens that URL with `#tracking`. The success receipt opens the new
+order directly. The detail endpoint checks the signed-in owner before returning
+one order. Filters are preserved for the browser tab when returning to history.
+Deploy the frontend and updated backend together; this navigation update needs no
+additional database migration. Shipment updates remain manual.
+
 ## 1. Supabase migration (required first)
 
 Run `server/migrations/20261003_order_experience.sql` in Supabase SQL Editor.

@@ -100,7 +100,7 @@ form.addEventListener('submit', async event => {
           document.getElementById('orderMessage').textContent = `Your equipment is one step closer. We’ve verified your payment and confirmed your order.`;
           document.getElementById('successReference').textContent = result.reference;
           document.getElementById('successTotal').textContent = money.format(result.total);
-          document.getElementById('viewOrders').href = `orders.html?order=${encodeURIComponent(result.reference)}`;
+          document.getElementById('viewOrders').href = `order.html?order=${encodeURIComponent(result.reference)}`;
           document.getElementById('successModal').hidden = false;
           document.querySelector('.checkout-shell').inert = true;
           document.querySelector('.checkout-header').inert = true;

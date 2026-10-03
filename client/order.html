@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Orders</title>
+    <title>Order details | PhysioWaye</title>
 
     <link rel="stylesheet" href="css/style.css?v=frontend-12">
     <link rel="stylesheet" href="css/responsive.css?v=frontend-12">
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="css/refinements.css?v=design-1">
 </head>
 
-<body class="page-orders">
+<body class="order-detail-page page-order">
     <header class="navbar">
         <div class="nav-container">
 
@@ -56,11 +56,9 @@
         </div>
     </header>
     <main class="orders-hub">
-      <div class="orders-heading"><div><span class="eyebrow">YOUR ACCOUNT</span><h1>Every order, at a glance.</h1><p>Your equipment, payment details and delivery updates — all in one place.</p></div><a class="orders-shop" href="products.html">Explore equipment <span aria-hidden="true">↗</span></a></div>
-      <section class="orders-toolbar" aria-label="Find an order"><label class="order-search"><span>Search your orders</span><input id="orderSearch" type="search" placeholder="Product name or order reference"></label><label><span>Order status</span><select id="orderFilter"><option value="all">All orders</option><option value="active">In progress</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></label></section>
-      <div class="orders-list-heading"><h2>Order history</h2><p id="ordersStatus" role="status" aria-live="polite">Loading your orders…</p></div>
+      <a class="back-to-orders" href="orders.html">&larr; Back to your orders</a>
+      <div class="orders-heading"><div><span class="eyebrow">YOUR ORDER</span><h1>All the details, right here.</h1><p id="ordersStatus" role="status" aria-live="polite">Loading your order...</p></div><a class="orders-shop" href="#tracking">Track your equipment &darr;</a></div>
       <div id="ordersList" class="orders-feed" aria-busy="true"></div>
-      <div class="orders-support"><div><strong>We’re here for your next step.</strong><p>Need help with equipment or an existing order?</p></div><a href="https://wa.me/919540043453" target="_blank" rel="noopener noreferrer">Talk to our agent ↗</a></div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

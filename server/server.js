@@ -357,6 +357,27 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
+function publicOrder(order) {
+  return { reference: order.public_reference, created_at: order.created_at,
+    total_amount: order.total_amount, status: order.status, details: order.details,
+    items: order.details?.items || (order.order_items || []).map(line => ({
+      id: line.products?.id, name: line.products?.product_name || 'Equipment', description: line.products?.description,
+      sku: line.products?.sku, image_url: line.products?.image_url, qty: line.quantity, price: line.price
+    }))
+  };
+}
+
+app.get('/api/orders/detail/:reference', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('orders')
+      .select('*, order_items(*, products(id, sku, product_name, description, selling_price, image_url))')
+      .eq('public_reference', req.params.reference).eq('user_id', req.user.id).maybeSingle();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Order not found in your account.' });
+    res.json(publicOrder(data));
+  } catch (_) { res.status(500).json({ error: 'Unable to load this order.' }); }
+});
+
 app.get("/api/orders/:userId", async (req, res) => {
 
   try {
@@ -379,13 +400,7 @@ app.get("/api/orders/:userId", async (req, res) => {
         .json(error);
 
     // Public API does not expose database sequence identifiers.
-    res.json(data.map(order => ({ reference: order.public_reference, created_at: order.created_at,
-      total_amount: order.total_amount, status: order.status, details: order.details,
-      items: order.details?.items || (order.order_items || []).map(line => ({
-        id: line.products?.id, name: line.products?.product_name || 'Equipment', description: line.products?.description,
-        sku: line.products?.sku, image_url: line.products?.image_url, qty: line.quantity, price: line.price
-      }))
-    })));
+    res.json(data.map(publicOrder));
 
   } catch (err) {
 
