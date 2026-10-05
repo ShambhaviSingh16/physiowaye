@@ -16,12 +16,14 @@ function itemHTML(item) {
   return `<article class="order-product"><img loading="lazy" src="${esc(safeImage)}" alt="${esc(item.name)}"><div><a href="product.html?id=${encodeURIComponent(item.id || '')}"><h3>${esc(item.name || 'Equipment')}</h3></a><p>Quantity ${esc(item.qty)} · ${currency.format(Number(item.price) || 0)} each</p>${item.description ? `<details class="product-overview"><summary>Product overview</summary><p>${esc(item.description)}</p></details>` : ''}</div><strong>${currency.format(Number(item.price || 0) * Number(item.qty || 0))}</strong></article>`;
 }
 function trackingHTML(order) {
-  const events = order.details?.tracking || [], shipment = order.details?.shipment || {};
+  const shipment = order.details?.shipment || {};
+  const events = [...(order.details?.tracking || []), ...(shipment.events || [])].sort((a,b) => String(a.at).localeCompare(String(b.at)));
+  const specialStatus = shipment.status_type === 'RT' || /rto|return|dto|exception|failed|undelivered/i.test(shipment.status || '');
   const stages = ['Confirmed','Packed','Shipped','Out for delivery','Delivered'];
   const current = stages.findIndex(stage => stage.toLowerCase() === String(order.status).toLowerCase());
   let link = '';
   try { const url = new URL(shipment.tracking_url); if (url.protocol === 'https:') link = `<a href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">Open courier tracking ↗</a>`; } catch (_) {}
-  return `<section class="order-tracking"><div class="order-section-heading"><h3>Track your equipment</h3><span>${esc(order.status || 'Pending')}</span></div>${/cancelled|refunded/i.test(order.status) ? '<p>This order is closed. Contact our team for help.</p>' : `<ol class="shipment-steps">${stages.map((stage,i) => `<li class="${i <= current ? 'reached' : ''}" ${i === current ? 'aria-current="step"' : ''}><span aria-hidden="true">${i < current ? '✓' : i+1}</span><strong>${stage}</strong><small>${i < current ? 'Completed' : i === current ? 'Current stage' : 'Awaiting update'}</small></li>`).join('')}</ol>`}<div class="shipment-note">${shipment.carrier ? `<strong>${esc(shipment.carrier)}</strong><p>Tracking number: ${esc(shipment.tracking_number || 'Awaiting assignment')}</p>${link}` : '<strong>Courier details will appear after dispatch.</strong><p>Our team will update this timeline as your equipment moves. No delivery date has been confirmed yet.</p>'}</div>${events.length ? `<ul class="tracking-events">${events.slice().reverse().map(event => `<li><strong>${esc(event.status)}</strong><time>${esc(date(event.at))}</time><p>${esc(event.note || '')}</p></li>`).join('')}</ul>` : '<p class="legacy-note">Detailed tracking was not recorded for this earlier order. Contact our team for an update.</p>'}</section>`;
+  return `<section class="order-tracking"><div class="order-section-heading"><h3>Track your equipment</h3><span>${esc(shipment.status || order.status || 'Pending')}</span></div>${specialStatus ? `<p>${esc(shipment.status)}. See the latest courier updates below.</p>` : /cancelled|refunded/i.test(order.status) ? '<p>This order is closed. Contact our team for help.</p>' : `<ol class="shipment-steps">${stages.map((stage,i) => `<li class="${i <= current ? 'reached' : ''}" ${i === current ? 'aria-current="step"' : ''}><span aria-hidden="true">${i < current ? '✓' : i+1}</span><strong>${stage}</strong><small>${i < current ? 'Completed' : i === current ? 'Current stage' : 'Awaiting update'}</small></li>`).join('')}</ol>`}<div class="shipment-note">${shipment.carrier ? `<strong>${esc(shipment.carrier)}</strong><p>Tracking number: ${esc(shipment.tracking_number || 'Awaiting assignment')}</p>${shipment.location ? `<p>Latest location: ${esc(shipment.location)}</p>` : ''}${shipment.synced_at ? `<p>Last checked: ${esc(date(shipment.synced_at))}</p>` : ''}${link}` : '<strong>Courier details will appear after dispatch.</strong><p>Our team will update this timeline as your equipment moves. No delivery date has been confirmed yet.</p>'}</div>${events.length ? `<ul class="tracking-events">${events.slice().reverse().map(event => `<li><strong>${esc(event.status)}</strong><time>${esc(date(event.at))}</time><p>${esc(event.note || '')}${event.location ? `<br>${esc(event.location)}` : ''}</p></li>`).join('')}</ul>` : '<p class="legacy-note">Detailed tracking was not recorded for this earlier order. Contact our team for an update.</p>'}${isOrderDetail && String(shipment.carrier).toLowerCase() === 'delhivery' ? '<p id="courierRefreshStatus" role="status" aria-live="polite">Checking Delhivery updates...</p>' : ''}</section>`;
 }
 function renderOrder(order) {
   const details = order.details || {}, items = order.items || [], payment = details.payment, delivery = details.delivery;
@@ -85,6 +87,7 @@ async function loadOrders() {
     orders = isOrderDetail ? [result] : result;
     if (!Array.isArray(orders)) throw new Error('Invalid orders response');
     render();
+    if (isOrderDetail) refreshCourierTracking(orders[0]);
   } catch (_) {
     ordersStatus.textContent = 'Your orders could not be loaded.';
     list.innerHTML = '<section class="orders-empty"><h3>Let’s try that again.</h3><p>We couldn’t reach your order history.</p><button id="retryOrders" type="button">Retry</button></section>';
@@ -97,3 +100,26 @@ if (!isOrderDetail) {
   search.addEventListener('input',render); filter.addEventListener('change',render);
 }
 loadOrders();
+
+async function refreshCourierTracking(order) {
+  if (String(order.details?.shipment?.carrier).toLowerCase() !== 'delhivery') return;
+  try {
+    const response = await apiFetch(`/orders/tracking/${encodeURIComponent(order.reference)}`);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Tracking unavailable');
+    if (!result.linked) {
+      document.getElementById('courierRefreshStatus').textContent = 'Shipment linking is being updated. Reload this order for the latest details.';
+      return;
+    }
+    order.status = result.status;
+    order.details.shipment = result.shipment;
+    const tracking = document.querySelector('#tracking .order-tracking');
+    if (tracking) tracking.outerHTML = trackingHTML(order);
+    const badge = document.querySelector('.order-badges > span');
+    if (badge) badge.textContent = order.status;
+    document.getElementById('courierRefreshStatus').textContent = 'Latest available Delhivery updates are shown. Reload this page to check again.';
+  } catch (_) {
+    const message = document.getElementById('courierRefreshStatus');
+    if (message) message.textContent = 'Delhivery updates are unavailable right now. Saved tracking is shown; please check again later.';
+  }
+}
