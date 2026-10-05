@@ -52,6 +52,20 @@ The owner opens `https://www.physiowaye.com/admin.html` and bookmarks it.
 The separate dashboard sign-in accepts the authorised email/password account.
 Its session is shared with the existing customer site in that browser.
 
+### Google sign-in
+
+The dashboard also offers **Sign in with Google** using the existing Supabase
+Google provider. In Supabase **Authentication → URL Configuration → Redirect URLs**,
+allow `https://www.physiowaye.com/admin.html` and
+`https://physiowaye.com/admin.html` if you serve both domains. Add the exact local
+admin URL separately if needed for development. The Google callback remains the
+existing Supabase Auth callback; this does not need another Google OAuth client.
+After Google returns to the dashboard, the backend checks `store_admins` for the
+authenticated user ID. Selecting a Google account does not itself grant admin access.
+Use the authorised owner's Google account. If Google resolves to a different
+Supabase user ID, verify that account in Authentication and grant the correct ID
+with the developer-only procedure above.
+
 Every `/api/admin` request verifies the Supabase session and private allowlist
 before reading data or changing products. Without access it returns 401/403;
 an unavailable role table fails closed. Dashboard HTML is public, its data is not.

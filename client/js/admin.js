@@ -39,6 +39,25 @@ document.getElementById('adminLogin').addEventListener('submit',async event=>{
   } catch(error) { document.getElementById('gateStatus').textContent=error.message; }
   finally {button.disabled=false;}
 });
+document.getElementById('adminGoogleLogin').addEventListener('click', async event => {
+  const button = event.currentTarget;
+  button.disabled = true;
+  document.getElementById('gateStatus').textContent = 'Opening Google sign-in…';
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: new URL('admin.html', window.location.href).href,
+        queryParams: { prompt: 'select_account' }
+      }
+    });
+    if (error) throw error;
+    if (!data?.url) throw new Error('Google sign-in could not be opened. Please try again.');
+  } catch (error) {
+    document.getElementById('gateStatus').textContent = error.message;
+    button.disabled = false;
+  }
+});
 async function signOut() {
   const {error}=await supabaseClient.auth.signOut();
   if(error) {statusLine.textContent='Sign out failed. Please try again.';return;}
