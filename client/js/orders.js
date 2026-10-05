@@ -23,7 +23,7 @@ function trackingHTML(order) {
   const current = stages.findIndex(stage => stage.toLowerCase() === String(order.status).toLowerCase());
   let link = '';
   try { const url = new URL(shipment.tracking_url); if (url.protocol === 'https:') link = `<a href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">Open courier tracking ↗</a>`; } catch (_) {}
-  return `<section class="order-tracking"><div class="order-section-heading"><h3>Track your equipment</h3><span>${esc(shipment.status || order.status || 'Pending')}</span></div>${specialStatus ? `<p>${esc(shipment.status)}. See the latest courier updates below.</p>` : /cancelled|refunded/i.test(order.status) ? '<p>This order is closed. Contact our team for help.</p>' : `<ol class="shipment-steps">${stages.map((stage,i) => `<li class="${i <= current ? 'reached' : ''}" ${i === current ? 'aria-current="step"' : ''}><span aria-hidden="true">${i < current ? '✓' : i+1}</span><strong>${stage}</strong><small>${i < current ? 'Completed' : i === current ? 'Current stage' : 'Awaiting update'}</small></li>`).join('')}</ol>`}<div class="shipment-note">${shipment.carrier ? `<strong>${esc(shipment.carrier)}</strong><p>Tracking number: ${esc(shipment.tracking_number || 'Awaiting assignment')}</p>${shipment.location ? `<p>Latest location: ${esc(shipment.location)}</p>` : ''}${shipment.synced_at ? `<p>Last checked: ${esc(date(shipment.synced_at))}</p>` : ''}${link}` : '<strong>Courier details will appear after dispatch.</strong><p>Our team will update this timeline as your equipment moves. No delivery date has been confirmed yet.</p>'}</div>${events.length ? `<ul class="tracking-events">${events.slice().reverse().map(event => `<li><strong>${esc(event.status)}</strong><time>${esc(date(event.at))}</time><p>${esc(event.note || '')}${event.location ? `<br>${esc(event.location)}` : ''}</p></li>`).join('')}</ul>` : '<p class="legacy-note">Detailed tracking was not recorded for this earlier order. Contact our team for an update.</p>'}${isOrderDetail && String(shipment.carrier).toLowerCase() === 'delhivery' ? '<p id="courierRefreshStatus" role="status" aria-live="polite">Checking Delhivery updates...</p>' : ''}</section>`;
+  return `<section class="order-tracking"><div class="order-section-heading"><h3>Track your equipment</h3><span>${esc(shipment.status || order.status || 'Pending')}</span></div>${specialStatus ? `<p>${esc(shipment.status)}. See the latest courier updates below.</p>` : /cancelled|refunded/i.test(order.status) ? '<p>This order is closed. Contact our team for help.</p>' : `<ol class="shipment-steps">${stages.map((stage,i) => `<li class="${i <= current ? 'reached' : ''}" ${i === current ? 'aria-current="step"' : ''}><span aria-hidden="true">${i < current ? '✓' : i+1}</span><strong>${stage}</strong><small>${i < current ? 'Completed' : i === current ? 'Current stage' : 'Awaiting update'}</small></li>`).join('')}</ol>`}<div class="shipment-note">${shipment.carrier ? `<strong>${esc(shipment.carrier)}</strong><p>Tracking number: ${esc(shipment.tracking_number || 'Awaiting assignment')}</p>${shipment.location ? `<p>Latest location: ${esc(shipment.location)}</p>` : ''}${shipment.synced_at ? `<p>Last checked: ${esc(date(shipment.synced_at))}</p>` : ''}${link}` : '<strong>Courier details will appear after dispatch.</strong><p>Our team will update this timeline as your equipment moves. No delivery date has been confirmed yet.</p>'}</div>${events.length ? `<ul class="tracking-events">${events.slice().reverse().map(event => `<li><strong>${esc(event.status)}</strong><time>${esc(date(event.at))}</time><p>${esc(event.note || '')}${event.location ? `<br>${esc(event.location)}` : ''}</p></li>`).join('')}</ul>` : '<p class="legacy-note">Detailed tracking was not recorded for this earlier order. Contact our team for an update.</p>'}${isOrderDetail && (!shipment.carrier || String(shipment.carrier).toLowerCase() === 'delhivery') ? '<p id="courierRefreshStatus" role="status" aria-live="polite">Checking Delhivery updates...</p>' : ''}</section>`;
 }
 function renderOrder(order) {
   const details = order.details || {}, items = order.items || [], payment = details.payment, delivery = details.delivery;
@@ -101,25 +101,34 @@ if (!isOrderDetail) {
 }
 loadOrders();
 
+let courierRefreshing = false;
 async function refreshCourierTracking(order) {
-  if (String(order.details?.shipment?.carrier).toLowerCase() !== 'delhivery') return;
+  if (courierRefreshing) return;
+  if (order.details?.shipment?.carrier && String(order.details.shipment.carrier).toLowerCase() !== 'delhivery') return;
+  courierRefreshing = true;
   try {
     const response = await apiFetch(`/orders/tracking/${encodeURIComponent(order.reference)}`);
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Tracking unavailable');
     if (!result.linked) {
-      document.getElementById('courierRefreshStatus').textContent = 'Shipment linking is being updated. Reload this order for the latest details.';
+      document.getElementById('courierRefreshStatus').textContent = 'No Delhivery shipment is available yet. Updates will appear automatically after dispatch is arranged.';
       return;
     }
     order.status = result.status;
+    order.details = order.details || {};
     order.details.shipment = result.shipment;
     const tracking = document.querySelector('#tracking .order-tracking');
     if (tracking) tracking.outerHTML = trackingHTML(order);
     const badge = document.querySelector('.order-badges > span');
     if (badge) badge.textContent = order.status;
-    document.getElementById('courierRefreshStatus').textContent = 'Latest available Delhivery updates are shown. Reload this page to check again.';
+    document.getElementById('courierRefreshStatus').textContent = 'Latest available Delhivery updates are shown. This page checks automatically while open.';
   } catch (_) {
     const message = document.getElementById('courierRefreshStatus');
     if (message) message.textContent = 'Delhivery updates are unavailable right now. Saved tracking is shown; please check again later.';
-  }
+  } finally { courierRefreshing = false; }
 }
+
+// Pause courier polling when this tab is hidden; no extra controls are needed.
+setInterval(() => {
+  if (isOrderDetail && !document.hidden && orders[0]) refreshCourierTracking(orders[0]);
+}, 60000);

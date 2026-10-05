@@ -8,7 +8,7 @@ Track order opens that URL with `#tracking`. The success receipt opens the new
 order directly. The detail endpoint checks the signed-in owner before returning
 one order. Filters are preserved for the browser tab when returning to history.
 Deploy the frontend and updated backend together; this navigation update needs no
-additional database migration. Linked B2C Delhivery AWBs refresh automatically when the customer opens the detail page.
+additional database migration. B2C Delhivery shipments are discovered by exact website order reference and refreshed automatically.
 
 ## 1. Supabase migration (required first)
 
@@ -58,7 +58,7 @@ select public.record_order_shipment(
 
 Allowed stages: Confirmed, Packed, Shipped, Out for delivery, Delivered, Cancelled.
 Each call appends a dated event. Courier links must use HTTPS to be displayed.
-Other couriers remain staff-maintained. See the Delhivery setup below for automatic B2C tracking.
+These manual examples are optional for other couriers or legacy shipments. New Delhivery shipments use the automatic setup below.
 Shipment status is independent of payment status: a paid order can be Confirmed
 while it is being prepared. Never move an order to Delivered merely because it is paid.
 
@@ -95,66 +95,79 @@ an inventory/courier service. Staff fulfilment and refund handling remain operat
 workflows. Configure these before scaling real payment volumes.
 
 
-## 5. Delhivery B2C AWB tracking
+## 5. Automatic Delhivery B2C tracking
 
-### Deploy
+### Activate automatic discovery
 
-1. Run `server/migrations/20261005_delhivery_tracking.sql` in Supabase SQL Editor.
-   This adds a service-role-only sync function; it does not assign any AWBs.
-2. Keep `DELHIVERY_API_TOKEN` in Render Environment (already configured).
-   The default is the production API. For a separate staging account/token only,
-   set `DELHIVERY_ENV=staging`. Razorpay Test Mode does not choose the courier environment.
-3. Deploy the updated backend and frontend together.
+1. Run `server/migrations/20261005_delhivery_auto_link.sql` in Supabase SQL Editor.
+   It replaces the previous sync function and can run whether or not the earlier
+   `20261005_delhivery_tracking.sql` was run. The original order-experience migration
+   must already be installed. This update retains existing order data.
+2. Keep `DELHIVERY_API_TOKEN` in Render Environment. Production is the default.
+   Use `DELHIVERY_ENV=staging` only with a Delhivery staging account and token.
+   Razorpay Test Mode does not switch the courier environment.
+3. Deploy the updated frontend and backend together.
+4. When creating a shipment in Delhivery One, use the website's full `PW-...`
+   reference as its **Order ID / reference**. Copy it exactly, including case.
+   The numeric AWB is assigned by Delhivery; it is distinct from the Order ID.
 
-### Link each shipment to its website order
+No AWB assignment or status entry in Supabase is needed for these new shipments.
+The backend queries Delhivery by `ref_ids`, accepts only one exact `ReferenceNo`
+match, retrieves its AWB, and saves the shipment and scan history automatically.
+If no shipment exists yet, the page shows that tracking is awaiting shipment.
+The website does not guess matches using a name, address, email or phone number.
 
-Continue creating shipments in Delhivery One. In Supabase SQL Editor run this
-for the matching website order only, after checking the customer and purchased items:
+Existing shipments whose Delhivery Order ID is a name, phone number, or another
+reference cannot be discovered automatically. They need a one-time correct AWB
+link using the staff SQL example in section 3; subsequent updates are automatic.
+Do not link historical dashboard shipments to unrelated new website orders.
 
-```sql
-select public.record_order_shipment(
-  'PW-REPLACE_WITH_WEBSITE_ORDER_REFERENCE',
-  'Packed',
-  'Your equipment is packed and awaiting courier pickup.',
-  '{"carrier":"Delhivery","tracking_number":"REPLACE_WITH_ACTUAL_AWB"}'::jsonb
-);
-```
+### Update even while nobody is viewing the website
 
-Use the **numeric AWB / waybill**, not Delhivery's separate Order ID, a phone
-number, or the website PW reference. Keep the AWB as a quoted string.
-Choose `Shipped` instead of `Packed` only if it has actually been handed over.
-Do not assign old shipments from dashboard screenshots to new website orders.
-Currently one forward AWB is supported per website order. Split shipments and
-separate reverse pickup AWBs need a further integration.
+Create a **Render Cron Job** using this repository:
 
-### Customer experience
+- Root directory: `server`
+- Build command: `npm ci`
+- Command: `node sync-delhivery-orders.js`
+- Schedule: `*/15 * * * *` (every 15 minutes; cron scheduling is UTC)
+- Environment variables: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+  `DELHIVERY_API_TOKEN`, and `DELHIVERY_ENV` only if staging is needed.
+  Copy the existing server values privately. Never put them in frontend files.
 
-Opening an order detail page loads saved information first, then checks Delhivery
-in the background. Track Order opens this same page at its tracking section.
-The history shows scan times (converted from India time), remarks, locations,
-current courier status, AWB and last checked time. Forward milestones update
-Packed, Shipped, Out for delivery or Delivered independently of payment.
-Return/RTO status is shown explicitly and does not imply delivery to the buyer.
+Confirm the Supabase service-role variable name matches `server/supabase.js`.
+The cron job scans nonterminal orders, discovers shipments, and saves their latest
+status and history. Calls are spaced one second apart to limit provider traffic.
+Jobs log aggregate counts only; individual customer data and tokens are not logged
+by the tracking job. Render Cron Jobs may incur hosting charges according to your plan.
+The job must be configured in Render; deploying the files alone does not schedule it.
 
-Sync saves the latest shipment snapshot atomically without overwriting payment,
-address or manual tracking events. Reads are checked against the signed-in owner;
-customers cannot supply or change AWBs through the tracking endpoint.
-Provider calls are deduplicated and cached for 60 seconds per AWB per server process.
-If Delhivery is unavailable, the page keeps the saved timeline and shows a notice.
-Reloading the page checks again. There is no scheduled polling or scan webhook
-in this version, so orders update when their detail page is visited.
+### Customer experience and boundaries
 
-No shipment creation, pickup booking, postage purchase or customer notifications
-are triggered by this tracking integration.
+The order detail page first shows saved data, then checks Delhivery automatically.
+It checks again every minute while the tab is visible. The provider response is
+cached for 60 seconds per shipment/reference per server process. Tracking history
+includes scan times (India time converted to an absolute timestamp), locations,
+remarks, current courier status, AWB and last checked time.
+Forward milestones update Packed, Shipped, Out for delivery and Delivered, while
+payment details stay unchanged. Returns/RTO are shown explicitly rather than
+marking a parcel delivered to the buyer. If the courier is unavailable, saved data
+remains visible with a notice and later checks retry automatically.
 
-### First activation check
+All shopper reads are owner-checked. Discovery and database syncing happen only
+on the server using the private token. Customer requests cannot supply AWBs.
+The sync function uses locking, checks reference/AWB ownership and rejects older
+snapshots or a conflicting AWB assigned to another website order.
 
-Use a genuine website order linked to its own AWB from this Delhivery account.
-Verify the timeline against Delhivery One. An AWB from another account, an
-unmanifested shipment, or a staging AWB with a production token cannot be tracked.
-The account connection has not been tested from this workspace; the Render-only
-token is deliberately not accessed here.
+Shipment creation and pickup booking still happen in Delhivery One. This integration
+retrieves tracking; it does not purchase shipping, book pickups or send notifications.
+Packing updates appear only when Delhivery publishes a relevant status; internal
+warehouse packing work is not inferred. One forward AWB per website order is supported.
+Split shipments and separate reverse-pickup AWBs need a separate extension.
+
+The live account has not been tested from this workspace. After deployment, compare
+one genuine order's matching shipment with Delhivery One. An AWB from another account,
+an unmanifested shipment, or mismatched staging/live credentials cannot be tracked.
 
 Official references:
-- [B2C Shipment Tracking API](https://one.delhivery.com/developer-portal/document/b2c/detail/order-tracking)
-- [Delhivery API FAQ and scan statuses](https://one.delhivery.com/developer-portal/document/b2c/detail/faq)
+- [B2C Shipment Tracking API and ref_ids lookup](https://one.delhivery.com/developer-portal/document/b2c/detail/order-tracking)
+- [Delhivery FAQ and scan statuses](https://one.delhivery.com/developer-portal/document/b2c/detail/faq)

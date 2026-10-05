@@ -7,7 +7,7 @@ const cors = require("cors");
 const Razorpay = require("razorpay");
 const requireAuth = require("./middleware/auth");
 const crypto = require("crypto");
-const { getTracking } = require('./delhivery');
+const { syncOrderTracking } = require('./delhivery-sync');
 
 
 const app = express();
@@ -375,15 +375,8 @@ app.get('/api/orders/tracking/:reference', async (req, res) => {
       .eq('public_reference', req.params.reference).eq('user_id', req.user.id).maybeSingle();
     if (error) throw error;
     if (!order) return res.status(404).json({ error: 'Order not found in your account.' });
-    const shipment = order.details?.shipment;
-    if (String(shipment?.carrier).toLowerCase() !== 'delhivery' || !shipment?.tracking_number)
-      return res.json({ linked: false });
-    const tracking = await getTracking(String(shipment.tracking_number));
-    const { data: saved, error: syncError } = await supabase.rpc('sync_delhivery_tracking', {
-      p_reference: order.public_reference, p_awb: String(shipment.tracking_number), p_shipment: tracking
-    });
-    if (syncError) throw syncError;
-    if (!saved) return res.status(409).json({ error: 'Shipment was updated. Reload this order.' });
+    const linked = await syncOrderTracking(supabase, order);
+    if (!linked) return res.json({ linked: false });
     const { data: refreshed, error: readError } = await supabase.from('orders').select('*')
       .eq('public_reference', req.params.reference).eq('user_id', req.user.id).single();
     if (readError) throw readError;
