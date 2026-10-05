@@ -1,5 +1,12 @@
 # Deploy the order experience
 
+## Owner dashboard
+
+The owner can view all customer orders and copy shipment references at `admin.html`.
+Apply the admin migration and grant the owner access using [ADMIN_SETUP.md](ADMIN_SETUP.md).
+This provides order/customer information, product management, analytics and activity
+history without giving the owner Supabase or Render access.
+
 ## Order detail navigation
 
 `orders.html` displays compact order cards with search and status filters.

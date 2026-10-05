@@ -41,6 +41,7 @@ app.post('/api/razorpay-webhook', express.raw({ type: 'application/json' }), asy
   }
 });
 app.use(express.json());
+app.use('/api/admin', require('./admin'));
 
 async function confirmCapturedPayment(checkout, payment) {
   if (payment.order_id !== checkout.razorpay_order_id || Number(payment.amount) !== Number(checkout.amount) || payment.currency !== 'INR' || payment.status !== 'captured') throw new Error('Payment capture is not confirmed.');
