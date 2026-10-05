@@ -4,6 +4,57 @@ const payButton = document.getElementById('payButton');
 const statusMessage = document.getElementById('checkoutStatus');
 const buyNowProductId = new URLSearchParams(location.search).get('buyNow');
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+const pinInput = document.getElementById('pincode');
+const pinStatus = document.getElementById('pincodeStatus');
+const cityInput = document.getElementById('city');
+const stateInput = document.getElementById('state');
+let pinController;
+let pinTimer;
+let pinRevision = 0;
+let filledCity = '';
+let filledState = '';
+const pinLocations = new Map();
+pinInput.addEventListener('input', () => {
+  clearTimeout(pinTimer);
+  pinController?.abort();
+  const revision = ++pinRevision;
+  const pin = pinInput.value.trim();
+  if (filledCity && cityInput.value === filledCity) cityInput.value = '';
+  if (filledState && stateInput.value === filledState) stateInput.value = '';
+  filledCity = filledState = '';
+  pinStatus.textContent = 'Enter your PIN to fill city / district and state.';
+  if (!/^[1-9]\d{5}$/.test(pin)) return;
+  const originalCity = cityInput.value;
+  const originalState = stateInput.value;
+  pinTimer = setTimeout(async () => {
+    const controller = new AbortController();
+    pinController = controller;
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    pinStatus.textContent = 'Finding your city / district and state...';
+    try {
+      let office = pinLocations.get(pin);
+      if (!office) {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${pin}`, { signal: controller.signal });
+        if (!response.ok) throw new Error('Lookup unavailable');
+        const result = await response.json();
+        office = result?.[0]?.Status === 'Success'
+          ? result[0].PostOffice?.find(item => String(item.Pincode) === pin && item.District && item.State)
+          : null;
+        if (!office) throw new Error('PIN not found');
+        pinLocations.set(pin, office);
+      }
+      if (revision !== pinRevision || pinInput.value.trim() !== pin) return;
+      // Do not replace a customer's edits made while the lookup was running.
+      if (cityInput.value === originalCity) cityInput.value = filledCity = office.District;
+      if (stateInput.value === originalState) stateInput.value = filledState = office.State;
+      pinStatus.textContent = 'Postal district and state found. Review the city / town and edit if needed.';
+    } catch (error) {
+      if (revision === pinRevision) pinStatus.textContent = 'Could not find this PIN right now. Please enter city and state manually.';
+    } finally {
+      clearTimeout(timeout);
+    }
+  }, 350);
+});
 let checkoutUser;
 let paymentBusy = false;
 let recordingOrder = false;

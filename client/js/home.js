@@ -8,7 +8,7 @@ if (featuredGrid) {
     })
     .then(products => {
       featuredGrid.replaceChildren();
-      (Array.isArray(products) ? products.slice(0, 4) : []).forEach(product => {
+      (Array.isArray(products) ? products.slice(0, 5) : []).forEach(product => {
         const link = document.createElement("a");
         link.className = "home-product-card";
         link.href = `product.html?id=${encodeURIComponent(product.id)}`;
