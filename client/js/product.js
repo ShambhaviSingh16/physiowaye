@@ -1,6 +1,11 @@
 const params = new URLSearchParams(window.location.search);
 const productId = params.get("id");
 const productCard = document.getElementById("productCard");
+const catalogGalleryCounts = Object.freeze({
+  "pw-001": 5, "pw-002": 6, "pw-003": 4, "pw-004": 5,
+  "pw-005": 4, "pw-006": 6, "pw-007": 5, "pw-008": 5,
+  "pw-009": 5, "pw-0010": 5, "pw-0011": 4
+});
 const formatINR = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",
@@ -16,7 +21,7 @@ function renderProduct(product) {
   const visual = document.createElement("div");
   visual.className = "product-gallery";
   const sku = String(product.sku || "").toLowerCase();
-  const localImage = sku ? `assets/images/products/${sku}.jpg` : null;
+  const localImage = sku ? `assets/images/products/${sku}.jpg?v=catalog-20261111` : null;
   const viewsImage = sku ? `assets/images/products/${sku}-views.jpg` : null;
   const gallerySheetUrl = viewsImage ? new URL(viewsImage, document.baseURI).href : (localImage ? new URL(localImage, document.baseURI).href : "");
   const galleryMain = document.createElement("div");
@@ -24,8 +29,12 @@ function renderProduct(product) {
   galleryMain.setAttribute("role", "group");
   galleryMain.setAttribute("aria-roledescription", "carousel");
 
-  const slides = [{ type: "image", src: product.image_url || localImage, label: "Product overview" }];
-  if (viewsImage) {
+  const slides = [{ type: "image", src: product.image_url || localImage, label: "Main product photo" }];
+  if (catalogGalleryCounts[sku]) {
+    for (let number = 2; number <= catalogGalleryCounts[sku]; number++) {
+      slides.push({ type: "image", src: `assets/images/products/${sku}-${number}.jpg?v=catalog-20261111`, label: `Product photo ${number}` });
+    }
+  } else if (viewsImage) {
     [
       ["0% 0%", "Front view"], ["100% 0%", "Side view"],
       ["0% 100%", "Control panel detail"], ["100% 100%", "Included accessories"]
@@ -67,7 +76,7 @@ function renderProduct(product) {
       photo.alt = "";
       photo.src = slide.src || "";
       photo.onerror = () => {
-        if (product.image_url && localImage && photo.src !== new URL(localImage, document.baseURI).href) {
+        if (localImage && photo.src !== new URL(localImage, document.baseURI).href) {
           photo.src = new URL(localImage, document.baseURI).href;
         } else {
           galleryFrame.classList.add("product-gallery-image-fallback");
@@ -102,7 +111,7 @@ function renderProduct(product) {
       const thumbnail = document.createElement("img");
       thumbnail.src = slide.src || "";
       thumbnail.alt = "";
-      thumbnail.onerror = () => { thumbnail.src = localImage || ""; };
+      thumbnail.onerror = () => { thumbnail.onerror = null; thumbnail.src = localImage || ""; };
       button.append(thumbnail);
     } else {
       button.style.backgroundImage = `url("${gallerySheetUrl}")`;
@@ -142,7 +151,9 @@ function renderProduct(product) {
   visual.append(galleryThumbs);
   const imageNote = document.createElement("p");
   imageNote.className = "product-image-note";
-  imageNote.textContent = "Illustrative product views. Please confirm exact model details with our team.";
+  imageNote.textContent = catalogGalleryCounts[sku]
+    ? "Product photos supplied by Physiowaye. Please confirm exact model details with our team."
+    : "Illustrative product views. Please confirm exact model details with our team.";
   visual.append(imageNote);
 
   const info = document.createElement("div");

@@ -49,3 +49,4 @@ body{background:#f3f7fa}button,input,textarea,select{font-family:inherit}a,butto
 @media(min-width:1200px){.home-featured-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:18px}.home-featured-grid .home-product-image{height:195px}}
 @media(min-width:901px) and (max-width:1199px){.home-featured-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .home-hero-copy .home-tagline-first{display:block;font-size:clamp(18px,2vw,25px);font-weight:700;letter-spacing:.02em;text-transform:none;line-height:1.5;color:#158ca7;margin-bottom:18px}
+.products-section .products-grid .product-content h2,.home-featured-grid .home-product-details h3{display:block;overflow:visible;-webkit-line-clamp:unset;min-height:4.5em;overflow-wrap:break-word}

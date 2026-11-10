@@ -15,7 +15,7 @@ if (featuredGrid) {
         const imageWrap = document.createElement("div");
         imageWrap.className = "home-product-image";
         const image = document.createElement("img");
-        image.src = product.image_url || (product.sku ? `assets/images/products/${String(product.sku).toLowerCase()}.jpg` : "");
+        image.src = product.image_url || (product.sku ? `assets/images/products/${String(product.sku).toLowerCase()}.jpg?v=catalog-20261111` : "");
         image.alt = product.product_name || "Physiotherapy equipment";
         image.loading = "lazy";
         image.onerror = () => { imageWrap.textContent = "Physiotherapy equipment"; imageWrap.classList.add("product-media-placeholder"); };

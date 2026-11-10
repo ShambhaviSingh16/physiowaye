@@ -69,7 +69,7 @@ Browse Products
     <img
       src="${
         product.image_url ||
-        `assets/images/products/${String(product.sku || "").toLowerCase()}.jpg`
+        `assets/images/products/${String(product.sku || "").toLowerCase()}.jpg?v=catalog-20261111`
       }"
       alt="${product.product_name}">
   </div>

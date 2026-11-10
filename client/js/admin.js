@@ -26,7 +26,7 @@ const iconPaths = {
 const icon = (name, className='nav-icon') => `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${iconPaths[name] || iconPaths.overview}"/></svg>`;
 document.querySelectorAll('.sidebar [data-section]').forEach(button => button.insertAdjacentHTML('afterbegin',icon(button.dataset.section)));
 function productThumb(product) {
-  const local = product.sku ? `assets/images/products/${encodeURIComponent(String(product.sku).toLowerCase())}.jpg` : 'assets/images/logo.png';
+  const local = product.sku ? `assets/images/products/${encodeURIComponent(String(product.sku).toLowerCase())}.jpg?v=catalog-20261111` : 'assets/images/logo.png';
   const source = /^https:\/\//.test(product.image_url || '') ? product.image_url : local;
   return `<img src="${esc(source)}" alt="" loading="lazy">`;
 }

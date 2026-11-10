@@ -303,7 +303,7 @@ npm run dev
 
 ---
 
-## Roadmap
+<!-- ## Roadmap
 
 - [x] Product catalog with search and category filtering
 - [x] Cart management
@@ -341,7 +341,7 @@ npm run dev
 - [ ] CI/CD pipeline — GitHub Actions (ESLint + Jest)
 - [ ] System architecture diagram + API flow diagram
 
----
+--- -->
 
 ## Author
 

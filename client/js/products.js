@@ -18,7 +18,7 @@ function createProductCard(product) {
   media.className = "product-media";
 
   const localImage = product.sku
-    ? `assets/images/products/${String(product.sku).toLowerCase()}.jpg`
+    ? `assets/images/products/${String(product.sku).toLowerCase()}.jpg?v=catalog-20261111`
     : null;
   const imageSource = product.image_url || localImage;
 

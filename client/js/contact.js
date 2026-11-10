@@ -5,7 +5,7 @@ contactForm?.addEventListener("submit", event => {
   if (!contactForm.reportValidity()) return;
 
   const fields = new FormData(contactForm);
-  const subject = `PhysioWaye website enquiry from ${fields.get("name")}`;
+  const subject = `Physiowaye website enquiry from ${fields.get("name")}`;
   const body = [
     `Name: ${fields.get("name")}`,
     `Email: ${fields.get("email")}`,

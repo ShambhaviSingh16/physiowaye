@@ -86,7 +86,7 @@ function renderLines(lines) {
     row.className = 'checkout-line';
     row.innerHTML = `<img alt=""><div><a href="product.html?id=${encodeURIComponent(product.id)}"><h3>${escapeHTML(product.product_name)}</h3></a><p>Qty: ${quantity} · ${money.format(product.selling_price)} each</p></div><strong>${money.format(Number(product.selling_price) * quantity)}</strong>`;
     const image = row.querySelector('img');
-    const local = product.sku ? `assets/images/products/${String(product.sku).toLowerCase()}.jpg` : '';
+    const local = product.sku ? `assets/images/products/${String(product.sku).toLowerCase()}.jpg?v=catalog-20261111` : '';
     image.src = product.image_url || local;
     image.alt = product.product_name;
     image.onerror = () => { image.onerror = null; if (local && image.getAttribute('src') !== local) image.src = local; else image.hidden = true; };
@@ -136,7 +136,7 @@ form.addEventListener('submit', async event => {
     }
     if (!window.Razorpay || !paymentOrder.id) throw new Error('Payment is unavailable. Please refresh and try again.');
     const payment = new Razorpay({
-      key: paymentOrder.key_id, amount: paymentOrder.amount, currency: 'INR', name: 'PhysioWaye', description: 'Equipment order', order_id: paymentOrder.id,
+      key: paymentOrder.key_id, amount: paymentOrder.amount, currency: 'INR', name: 'Physiowaye', description: 'Equipment order', order_id: paymentOrder.id,
       prefill: { name: document.getElementById('name').value.trim(), email: document.getElementById('email').value.trim(), contact: document.getElementById('phone').value.trim() },
       theme: { color: '#158ec1' },
       modal: { ondismiss: () => { if (recordingOrder || orderCompleted) return; setBusy(false); statusMessage.textContent = 'Payment was closed. You can continue when you are ready.'; } },

@@ -1,4 +1,4 @@
-# PhysioWaye owner dashboard
+# Physiowaye owner dashboard
 
 ## 1. Apply the migration
 
