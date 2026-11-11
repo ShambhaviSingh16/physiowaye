@@ -321,31 +321,71 @@ document
   );
 
 
-function showToast(message) {
+let activeToast = null;
+let activeToastTimer = null;
 
-  const toast =
-    document.createElement("div");
+function showToast(message, options = {}) {
+  if (activeToast) activeToast.remove();
+  window.clearTimeout(activeToastTimer);
 
-  toast.className =
-    "toast-message";
+  const type = options.type === "error" ? "error" : "success";
+  const toast = document.createElement("div");
+  toast.className = `toast-message toast-${type}`;
+  if (options.announce === false) {
+    toast.setAttribute("aria-hidden", "true");
+  } else {
+    toast.setAttribute("role", type === "error" ? "alert" : "status");
+  }
+  const icon = document.createElement("span");
+  icon.className = "toast-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = type === "error" ? "!" : "✓";
 
-  toast.innerText =
-    message;
+  const copy = document.createElement("div");
+  copy.className = "toast-copy";
+  const heading = document.createElement("strong");
+  heading.textContent = options.title || (type === "error" ? "Please try again" : "All set");
+  const detail = document.createElement("span");
+  detail.textContent = message;
+  copy.append(heading, detail);
 
-  document.body.appendChild(toast);
+  toast.append(icon, copy);
+  if (options.actionHref && options.actionLabel) {
+    const action = document.createElement("a");
+    action.className = "toast-action";
+    action.href = options.actionHref;
+    action.textContent = options.actionLabel;
+    toast.append(action);
+  }
 
-  setTimeout(() => {
-    toast.classList.add("show");
-  }, 100);
+  const dismiss = document.createElement("button");
+  dismiss.type = "button";
+  dismiss.className = "toast-dismiss";
+  dismiss.setAttribute("aria-label", "Dismiss notification");
+  dismiss.textContent = "×";
+  toast.append(dismiss);
 
-  setTimeout(() => {
-
+  const close = () => {
+    window.clearTimeout(activeToastTimer);
     toast.classList.remove("show");
+    window.setTimeout(() => toast.remove(), 200);
+    if (activeToast === toast) activeToast = null;
+  };
+  const startDismissTimer = () => {
+    window.clearTimeout(activeToastTimer);
+    activeToastTimer = window.setTimeout(close, type === "error" ? 7000 : 5500);
+  };
 
-    setTimeout(() => {
-      toast.remove();
-    }, 300);
+  dismiss.addEventListener("click", close);
+  toast.addEventListener("pointerenter", () => window.clearTimeout(activeToastTimer));
+  toast.addEventListener("pointerleave", startDismissTimer);
+  toast.addEventListener("focusin", () => window.clearTimeout(activeToastTimer));
+  toast.addEventListener("focusout", event => {
+    if (!toast.contains(event.relatedTarget)) startDismissTimer();
+  });
 
-  }, 2500);
-
+  document.body.append(toast);
+  activeToast = toast;
+  window.requestAnimationFrame(() => toast.classList.add("show"));
+  startDismissTimer();
 }

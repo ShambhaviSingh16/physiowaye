@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/style.css?v=nav-20261111">
   <link rel="stylesheet" href="css/responsive.css?v=frontend-11">
   <link rel="stylesheet" href="css/refinements.css?v=design-5">
+  <link rel="stylesheet" href="css/notifications.css?v=20261111">
 </head>
 <body class="page-contact">
 
@@ -85,7 +86,7 @@
         <div><label for="contactMessage">How can we help?</label><textarea id="contactMessage" name="message" minlength="10" maxlength="4000" placeholder="Product question, order support, or anything else…" required></textarea></div>
         <div hidden aria-hidden="true"><label for="contactWebsite">Website</label><input id="contactWebsite" name="website" type="text" tabindex="-1" autocomplete="off"></div>
         <button type="submit" class="btn-primary">Send message <span aria-hidden="true">→</span></button>
-        <p id="contactStatus" class="contact-form-note" role="status" aria-live="polite">Your message will be sent to our team.</p>
+        <p id="contactStatus" class="contact-form-note" data-state="idle" role="status" aria-live="polite">Your message will be sent to our team.</p>
       </form>
     </div>
   </section>
@@ -147,10 +148,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/api.js"></script><script src="js/guest-cart.js?v=guest-cart-20261111"></script>
-<script src="js/auth.js?v=guest-cart-20261111"></script>
+<script src="js/auth.js?v=notifications-20261111"></script>
 
 <script src="js/main.js?v=nav-20261111"></script>
-<script src="js/contact.js?v=contact-error-copy-20261111"></script>
+<script src="js/contact.js?v=notifications-20261111"></script>
 </body>
 </html>
 

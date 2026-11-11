@@ -334,7 +334,11 @@ async function loadProduct() {
 async function addToCart(id, stock) {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) {
-    showToast(addGuestCartItem(id, stock) ? 'Added to your cart' : 'No more stock is available for this item.');
+    if (addGuestCartItem(id, stock)) {
+      showToast('Your item is ready to review.', { title: 'Added to cart', actionLabel: 'View cart', actionHref: 'cart.html' });
+    } else {
+      showToast('No more stock is available for this item.', { type: 'error', title: 'Stock limit reached' });
+    }
     updateCartCount();
     return;
   }
@@ -346,11 +350,11 @@ async function addToCart(id, stock) {
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.message || "Could not add this item");
-    showToast("Added to your cart");
+    showToast('Your item is ready to review.', { title: 'Added to cart', actionLabel: 'View cart', actionHref: 'cart.html' });
     updateCartCount();
   } catch (error) {
     console.error("Cart request failed:", error);
-    showToast("We couldn’t add this item. Please try again.");
+    showToast("We couldn’t add this item. Please try again.", { type: 'error', title: 'Cart not updated' });
   }
 }
 
