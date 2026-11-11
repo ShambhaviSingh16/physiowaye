@@ -18,7 +18,7 @@ contactForm?.addEventListener('submit', async event => {
     contactForm.reset();
     status.textContent = 'Message sent. Our team will reply by email.';
   } catch (error) {
-    status.textContent = `${error.message} You can also email physiowaye@gmail.com.`;
+    status.textContent = error.message || 'Your message could not be sent. Please email physiowaye@gmail.com directly.';
   } finally {
     button.disabled = false;
   }

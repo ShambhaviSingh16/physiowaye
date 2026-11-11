@@ -20,7 +20,13 @@ const range = req => [(page(req)-1)*size, page(req)*size-1];
 const safeText = value => String(value || '').trim();
 const cleanSearch = value => safeText(value).replace(/[%_]/g, '').slice(0,100);
 const wrap = handler => async (req,res) => {
-  try { await handler(req,res); } catch (_) { res.status(500).json({ error: 'This action could not be completed. Please try again or contact your developer.' }); }
+  try { await handler(req,res); } catch (error) {
+    console.error('Admin request failed', { path: req.path, code: error.code, message: error.message });
+    if (req.path === '/messages') {
+      return res.status(503).json({ error: 'Customer messages are unavailable. Check that the contact messages migration was run in production.' });
+    }
+    res.status(500).json({ error: 'This action could not be completed. Please try again or contact your developer.' });
+  }
 };
 router.get('/me', (req,res) => res.json({ email: req.user.email }));
 router.get('/messages', wrap(async (req,res) => {
@@ -67,9 +73,16 @@ router.get('/products', wrap(async (req,res) => {
 }));
 router.post('/products', wrap(async (req,res) => {
   const input = req.body || {};
+  const suppliedImages = input.image_urls === undefined
+    ? (safeText(input.image_url) ? [safeText(input.image_url)] : [])
+    : input.image_urls;
+  const images = Array.isArray(suppliedImages) ? suppliedImages.map(url => {
+    if (typeof url !== 'string') return url;
+    try { return new URL(url.trim()).href; } catch (_) { return url.trim(); }
+  }) : suppliedImages;
   const product = { sku:safeText(input.sku), product_name:safeText(input.product_name), description:safeText(input.description),
     mrp:Number(input.mrp),selling_price:Number(input.selling_price),stock:Number(input.stock),
-    image_url:safeText(input.image_url),is_active:input.is_active };
+    image_url:Array.isArray(images) ? (images[0] || '') : '',image_urls:images,is_active:input.is_active };
   const id = input.id == null ? null : Number(input.id);
   const revision = Number(input.admin_revision || 0);
   if (product.sku.length < 2 || product.sku.length > 60 || !/^[a-zA-Z0-9_-]+$/.test(product.sku)
@@ -79,10 +92,10 @@ router.post('/products', wrap(async (req,res) => {
     || !Number.isInteger(product.stock) || product.stock < 0 || product.stock > 1000000
     || typeof product.is_active !== 'boolean' || (id !== null && (!Number.isSafeInteger(id) || id < 1))
     || !Number.isInteger(revision) || revision < 0) return res.status(400).json({error:'Check the product fields, price and stock.'});
-  if (product.image_url) {
-    try { if (new URL(product.image_url).protocol !== 'https:') throw new Error(); }
-    catch (_) { return res.status(400).json({error:'Use an HTTPS image URL or upload an image.'}); }
-  }
+  if (!Array.isArray(images) || images.length > 6 || images.some(url => {
+    if (typeof url !== 'string' || !url.trim() || url.length > 2048) return true;
+    try { return new URL(url).protocol !== 'https:'; } catch (_) { return true; }
+  })) return res.status(400).json({error:'Add up to six HTTPS image URLs or upload JPEG, PNG or WebP files.'});
   const { data,error } = await supabase.rpc('admin_save_product',{p_actor:req.user.id,p_id:id,p_revision:revision,p_data:product});
   if (error) return res.status(409).json({error: error.code === '23505' ? 'That SKU already exists.' : 'The product could not be saved. Reload it in case another edit changed it.'});
   res.json(data);

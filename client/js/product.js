@@ -12,7 +12,7 @@ const formatINR = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 0
 });
 
-function updateProductMetadata(product, imageSource) {
+function updateProductMetadata(product, imageSources) {
   const title = `${product.product_name || 'Physiotherapy equipment'} | Physiowaye`;
   const summary = String(product.description || 'Physiotherapy equipment from Physiowaye.')
     .replace(/\s+/g, ' ').trim().slice(0, 155);
@@ -41,7 +41,7 @@ function updateProductMetadata(product, imageSource) {
     name: product.product_name,
     description: product.description,
     sku: product.sku,
-    image: imageSource ? new URL(imageSource, document.baseURI).href : undefined,
+    image: imageSources.map(source => new URL(source, document.baseURI).href),
     brand: { '@type': 'Brand', name: 'Physiowaye' },
     offers: {
       '@type': 'Offer',
@@ -63,7 +63,8 @@ function renderProduct(product) {
   visual.className = "product-gallery";
   const sku = String(product.sku || "").toLowerCase();
   const localImage = sku ? `assets/images/products/${sku}.jpg?v=catalog-20261111` : null;
-  updateProductMetadata(product, product.image_url || localImage);
+  const savedImages = Array.isArray(product.image_urls)
+    ? product.image_urls.filter(source => typeof source === 'string' && source).slice(0, 6) : [];
   const viewsImage = sku ? `assets/images/products/${sku}-views.jpg` : null;
   const gallerySheetUrl = viewsImage ? new URL(viewsImage, document.baseURI).href : (localImage ? new URL(localImage, document.baseURI).href : "");
   const galleryMain = document.createElement("div");
@@ -71,17 +72,20 @@ function renderProduct(product) {
   galleryMain.setAttribute("role", "group");
   galleryMain.setAttribute("aria-roledescription", "carousel");
 
-  const slides = [{ type: "image", src: product.image_url || localImage, label: "Main product photo" }];
-  if (catalogGalleryCounts[sku]) {
+  const slides = savedImages.length
+    ? savedImages.map((src, index) => ({ type: "image", src, label: index ? `Product photo ${index + 1}` : "Main product photo" }))
+    : [{ type: "image", src: product.image_url || localImage, label: "Main product photo" }];
+  if (!savedImages.length && catalogGalleryCounts[sku]) {
     for (let number = 2; number <= catalogGalleryCounts[sku]; number++) {
       slides.push({ type: "image", src: `assets/images/products/${sku}-${number}.jpg?v=catalog-20261111`, label: `Product photo ${number}` });
     }
-  } else if (viewsImage) {
+  } else if (!savedImages.length && viewsImage) {
     [
       ["0% 0%", "Front view"], ["100% 0%", "Side view"],
       ["0% 100%", "Control panel detail"], ["100% 100%", "Included accessories"]
     ].forEach(([position, label]) => slides.push({ type: "sheet", position, label }));
   }
+  updateProductMetadata(product, slides.filter(slide => slide.type === 'image' && slide.src).map(slide => slide.src));
 
   const galleryFrame = document.createElement("div");
   galleryFrame.className = "product-gallery-frame";
@@ -98,12 +102,19 @@ function renderProduct(product) {
   galleryNext.className = "product-gallery-arrow product-gallery-arrow-next";
   galleryNext.setAttribute("aria-label", "Show next product image");
   galleryNext.textContent = "\u203a";
+  galleryPrevious.hidden = slides.length < 2;
+  galleryNext.hidden = slides.length < 2;
   galleryMain.append(galleryPrevious, galleryNext);
   visual.append(galleryMain);
 
   const galleryThumbs = document.createElement("div");
   galleryThumbs.className = "product-gallery-thumbs";
   galleryThumbs.setAttribute("aria-label", "Choose a product view");
+  galleryThumbs.hidden = slides.length < 2;
+  const galleryCounter = document.createElement("span");
+  galleryCounter.className = "product-gallery-counter";
+  galleryCounter.setAttribute("aria-hidden", "true");
+  galleryMain.append(galleryCounter);
   let activeSlide = 0;
   let autoAdvanceTimer;
   const renderSlide = (index, direction = 1) => {
@@ -140,6 +151,7 @@ function renderProduct(product) {
     galleryFrame.style.backgroundImage = entering.style.backgroundImage;
     galleryFrame.style.backgroundPosition = entering.style.backgroundPosition;
     galleryMain.setAttribute("aria-label", `${slide.label}, image ${activeSlide + 1} of ${slides.length}`);
+    galleryCounter.textContent = `${activeSlide + 1} / ${slides.length}`;
     galleryThumbs.querySelectorAll("button").forEach((button, buttonIndex) => {
       button.setAttribute("aria-current", buttonIndex === activeSlide ? "true" : "false");
     });
@@ -193,7 +205,7 @@ function renderProduct(product) {
   visual.append(galleryThumbs);
   const imageNote = document.createElement("p");
   imageNote.className = "product-image-note";
-  imageNote.textContent = catalogGalleryCounts[sku]
+  imageNote.textContent = savedImages.length || catalogGalleryCounts[sku]
     ? "Product photos supplied by Physiowaye. Please confirm exact model details with our team."
     : "Illustrative product views. Please confirm exact model details with our team.";
   visual.append(imageNote);
@@ -208,9 +220,20 @@ function renderProduct(product) {
   const title = document.createElement("h1");
   title.textContent = product.product_name || "Physiotherapy equipment";
 
-  const description = document.createElement("p");
-  description.className = "product-desc";
-  description.textContent = product.description || "Product details will be available soon.";
+  const fullDescription = String(product.description || "Product details will be available soon.").replace(/\s+/g, " ").trim();
+  const descriptionSentences = fullDescription.split(/(?<=[.!?])\s+(?=[A-Z])/u);
+  const leadText = descriptionSentences.slice(0, 2).join(" ");
+  const shortDescription = leadText.length > 320
+    ? `${leadText.slice(0, 320).replace(/\s+\S*$/, "").trimEnd()}…`
+    : leadText;
+  const summary = document.createElement("p");
+  summary.className = "product-summary";
+  summary.textContent = shortDescription;
+
+  const detailsLink = document.createElement("a");
+  detailsLink.className = "product-details-link";
+  detailsLink.href = "#productInformation";
+  detailsLink.textContent = "Explore product details ↓";
 
   const price = document.createElement("div");
   price.className = "product-detail-price";
@@ -221,6 +244,10 @@ function renderProduct(product) {
     const mrp = document.createElement("del");
     mrp.textContent = formatINR.format(Number(product.mrp));
     price.append(mrp);
+    const savings = document.createElement("span");
+    savings.className = "product-savings";
+    savings.textContent = `Save ${formatINR.format(Number(product.mrp) - Number(product.selling_price))}`;
+    price.append(savings);
   }
 
   const stock = document.createElement("p");
@@ -254,9 +281,33 @@ function renderProduct(product) {
     benefits.append(item);
   });
 
-  info.append(category, title, description, price, stock, purchaseActions, benefits);
+  const purchasePanel = document.createElement("div");
+  purchasePanel.className = "product-purchase-panel";
+  purchasePanel.append(price, stock, purchaseActions, benefits);
+
+  info.append(category, title, summary, detailsLink, purchasePanel);
   layout.append(visual, info);
-  productCard.append(layout);
+
+  const information = document.createElement("section");
+  information.className = "product-information";
+  information.id = "productInformation";
+  const informationHeading = document.createElement("div");
+  informationHeading.className = "product-information-heading";
+  const informationEyebrow = document.createElement("span");
+  informationEyebrow.className = "eyebrow";
+  informationEyebrow.textContent = "THE DETAILS";
+  const informationTitle = document.createElement("h2");
+  informationTitle.textContent = "About this equipment";
+  informationHeading.append(informationEyebrow, informationTitle);
+  const informationCopy = document.createElement("div");
+  informationCopy.className = "product-information-copy";
+  for (let index = 0; index < descriptionSentences.length; index += 3) {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = descriptionSentences.slice(index, index + 3).join(" ");
+    informationCopy.append(paragraph);
+  }
+  information.append(informationHeading, informationCopy);
+  productCard.append(layout, information);
 }
 
 function showImageFallback(visual) {

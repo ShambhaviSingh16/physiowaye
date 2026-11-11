@@ -32,7 +32,33 @@ function productThumb(product) {
   return `<img src="${esc(source)}" alt="" loading="lazy">`;
 }
 
-let section='overview', currentPage=1, query='', orderStatus='', products=[], selectedProduct=null, customerId=null, requestRevision=0;
+let section='overview', currentPage=1, query='', orderStatus='', products=[], selectedProduct=null, customerId=null, requestRevision=0, galleryDraft=[], galleryUploading=false;
+const catalogPhotoCounts = {'pw-001':5,'pw-002':6,'pw-003':4,'pw-004':5,'pw-005':4,'pw-006':6,'pw-007':5,'pw-008':5,'pw-009':5,'pw-0010':5,'pw-0011':4};
+function existingProductImages(product) {
+  if (!product) return [];
+  if (Array.isArray(product.image_urls) && product.image_urls.length) return product.image_urls.slice(0,6);
+  const sku=String(product.sku||'').toLowerCase();
+  const images=[product.image_url || (catalogPhotoCounts[sku] ? new URL(`assets/images/products/${sku}.jpg`,document.baseURI).href : '')].filter(Boolean);
+  for(let number=2;number<=(catalogPhotoCounts[sku]||1);number++) {
+    images.push(new URL(`assets/images/products/${sku}-${number}.jpg`,document.baseURI).href);
+  }
+  return images;
+}
+function renderImageEditor() {
+  const list=document.getElementById('productImageList');
+  if(!list)return;
+  list.innerHTML=galleryDraft.map((url,index)=>`<div class="admin-image-row">
+    <div class="admin-image-preview">${url?`<img src="${esc(url)}" alt="Product image ${index+1} preview">`:'<span>Choose a photo</span>'}</div>
+    <div class="admin-image-fields">
+      <label>Image ${index+1}${index===0?' · Cover':''}<input type="url" data-image-url="${index}" value="${esc(url)}" placeholder="https://..." aria-label="Image ${index+1} URL"></label>
+      <label>Upload JPEG, PNG or WebP (up to 5 MB)<input type="file" data-image-file="${index}" accept="image/jpeg,image/png,image/webp"></label>
+      <div class="admin-image-actions"><button type="button" class="secondary" data-image-up="${index}" ${index===0?'disabled':''}>Move up</button><button type="button" class="secondary" data-image-remove="${index}">Remove</button></div>
+    </div>
+  </div>`).join('');
+  document.getElementById('imageCount').textContent=`${galleryDraft.length} of 6 images`;
+  document.getElementById('addProductImage').disabled=galleryDraft.length>=6;
+  document.getElementById('productImageBatch').disabled=galleryDraft.length>=6;
+}
 const titles={overview:'Your store at a glance',orders:'Orders & shipments',products:'Your product catalog',customers:'Your customers',messages:'Customer messages',activity:'Activity history'};
 async function request(path,options={}) {
   const response=await apiFetch(`/admin${path}`,options);
@@ -153,11 +179,25 @@ async function openOrder(reference) {
   } catch(error){if(revision===requestRevision)statusLine.textContent=error.message;}
 }
 function productForm(product=null) {
-  requestRevision++; selectedProduct=product;statusLine.textContent='';const p=product||{};
-  content.innerHTML=`<div class="toolbar"><button class="secondary" data-back>← Back to catalog</button></div><section class="panel"><h2>${product?'Edit product':'Add a product'}</h2><form id="productForm" class="form-grid"><label>Product name<input name="product_name" required minlength="2" maxlength="250" value="${esc(p.product_name)}"></label><label>SKU<input name="sku" required pattern="[A-Za-z0-9_-]{2,60}" value="${esc(p.sku)}"><small>Unique code, e.g. PW-012</small></label><label class="wide">Description<textarea name="description" maxlength="10000">${esc(p.description)}</textarea></label><label>MRP (₹)<input name="mrp" type="number" min="0.01" step="0.01" required value="${esc(p.mrp)}"></label><label>Selling price (₹)<input name="selling_price" type="number" min="0.01" step="0.01" required value="${esc(p.selling_price)}"></label><label>Stock quantity<input name="stock" type="number" min="0" step="1" required value="${esc(p.stock??0)}"></label><label>Product image<input id="productImageFile" type="file" accept="image/jpeg,image/png,image/webp"><small>JPEG, PNG or WebP · Up to 5 MB</small></label><label class="wide">Image URL<input name="image_url" id="productImageUrl" type="url" value="${esc(p.image_url)}"><small>Upload above, or paste an HTTPS image URL.</small></label><label class="checkbox wide"><input name="is_active" type="checkbox" ${p.is_active!==false?'checked':''}>Available in the store (uncheck to archive)</label><div class="actions wide"><button type="submit">Save product</button><button class="secondary" type="button" data-back>Cancel</button></div></form></section>`;
+  requestRevision++; selectedProduct=product;galleryDraft=existingProductImages(product);statusLine.textContent='';const p=product||{};
+  content.innerHTML=`<div class="toolbar"><button class="secondary" data-back>← Back to catalog</button></div><section class="panel"><h2>${product?'Edit product':'Add a product'}</h2><form id="productForm" class="form-grid">
+    <label>Product name<input name="product_name" required minlength="2" maxlength="250" value="${esc(p.product_name)}"></label>
+    <label>SKU<input name="sku" required pattern="[A-Za-z0-9_-]{2,60}" value="${esc(p.sku)}"><small>Unique code, e.g. PW-012</small></label>
+    <label class="wide">Description<textarea name="description" maxlength="10000">${esc(p.description)}</textarea></label>
+    <label>MRP (₹)<input name="mrp" type="number" min="0.01" step="0.01" required value="${esc(p.mrp)}"></label>
+    <label>Selling price (₹)<input name="selling_price" type="number" min="0.01" step="0.01" required value="${esc(p.selling_price)}"></label>
+    <label>Stock quantity<input name="stock" type="number" min="0" step="1" required value="${esc(p.stock??0)}"></label>
+    <div class="wide"><div class="admin-image-heading"><div><strong>Product photos</strong><small>The first image is the cover photo shown in product cards. Add up to 6 images.</small></div><span id="imageCount"></span></div><div id="productImageList" class="admin-image-list"></div><div class="admin-image-add"><label>Upload photos together<input id="productImageBatch" type="file" accept="image/jpeg,image/png,image/webp" multiple><small>Choose up to 6 JPEG, PNG or WebP files, 5 MB each.</small></label><button type="button" id="addProductImage" class="secondary" data-image-add>Or add an image URL +</button></div></div>
+    <label class="checkbox wide"><input name="is_active" type="checkbox" ${p.is_active!==false?'checked':''}>Available in the store (uncheck to archive)</label>
+    <div class="actions wide"><button type="submit">Save product</button><button class="secondary" type="button" data-back>Cancel</button></div>
+  </form></section>`;
+  renderImageEditor();
 }
 content.addEventListener('click',async event=>{
   const button=event.target.closest('button');if(!button)return;statusLine.textContent='';
+  if(button.hasAttribute('data-image-add')){if(galleryDraft.length<6){galleryDraft.push('');renderImageEditor();}return;}
+  if(button.hasAttribute('data-image-remove')){galleryDraft.splice(Number(button.dataset.imageRemove),1);renderImageEditor();return;}
+  if(button.hasAttribute('data-image-up')){const index=Number(button.dataset.imageUp);if(index>0){[galleryDraft[index-1],galleryDraft[index]]=[galleryDraft[index],galleryDraft[index-1]];renderImageEditor();}return;}
   if(button.hasAttribute('data-page')){currentPage=Number(button.dataset.page);return loadSection();}
   if(button.hasAttribute('data-order'))return openOrder(button.dataset.order);
   if(button.hasAttribute('data-customer')){customerId=button.dataset.customer;currentPage=1;return loadSection();}
@@ -175,7 +215,11 @@ content.addEventListener('submit',async event=>{
   event.preventDefault();const form=event.target;
   if(form.id==='adminSearch'){query=form.elements.q.value;orderStatus=form.elements.status?.value||'';currentPage=1;return loadSection();}
   if(form.id!=='productForm')return;
+  if(galleryUploading)return;
+  form.querySelectorAll('[data-image-url]').forEach(input=>{galleryDraft[Number(input.dataset.imageUrl)]=input.value.trim();});
   const data=Object.fromEntries(new FormData(form));data.is_active=form.elements.is_active.checked;
+  data.image_urls=galleryDraft.map(url=>String(url).trim()).filter(Boolean);
+  data.image_url=data.image_urls[0]||'';
   if(selectedProduct){data.id=selectedProduct.id;data.admin_revision=selectedProduct.admin_revision;}
   if(Number(data.selling_price)>Number(data.mrp)){statusLine.textContent='Selling price cannot exceed MRP.';return;}
   if(!confirm(data.is_active?'Save these product details?':'Archive this product? It will disappear from sale, but past orders will remain.'))return;
@@ -184,12 +228,50 @@ content.addEventListener('submit',async event=>{
   catch(error){statusLine.textContent=error.message;}finally{button.disabled=false;}
 });
 content.addEventListener('change',async event=>{
-  if(event.target.id!=='productImageFile')return;
+  if(event.target.hasAttribute('data-image-url')) {
+    const index=Number(event.target.dataset.imageUrl);
+    galleryDraft[index]=event.target.value.trim();
+    const preview=event.target.closest('.admin-image-row').querySelector('.admin-image-preview');
+    preview.replaceChildren();
+    if(galleryDraft[index]){
+      const image=document.createElement('img');
+      image.src=galleryDraft[index];
+      image.alt=`Product image ${index+1} preview`;
+      preview.append(image);
+    } else preview.textContent='Choose a photo';
+    return;
+  }
+  if(event.target.id==='productImageBatch' && !galleryUploading) {
+    const files=[...event.target.files];
+    if(!files.length)return;
+    if(files.length>6-galleryDraft.length){statusLine.textContent='Remove existing images or choose fewer files. A product can have up to 6 photos.';return;}
+    if(files.some(file=>file.size>5242880 || !['image/jpeg','image/png','image/webp'].includes(file.type))){statusLine.textContent='Each photo must be a JPEG, PNG or WebP image up to 5 MB.';return;}
+    const form=event.target.closest('#productForm');
+    const button=form.querySelector('[type=submit]');galleryUploading=true;button.disabled=true;
+    try {
+      for(const file of files) {
+        statusLine.textContent=`Uploading image ${files.indexOf(file)+1} of ${files.length}…`;
+        const result=await request('/images',{method:'POST',headers:{'Content-Type':file.type},body:await file.arrayBuffer()});
+        if(document.getElementById('productForm')!==form)return;
+        galleryDraft.push(result.url);
+        renderImageEditor();
+      }
+      statusLine.textContent='Photos uploaded. Save the product to publish them.';
+    } catch(error){statusLine.textContent=`${error.message} Any uploaded photos are shown below; save the product to keep them.`;}
+    finally{galleryUploading=false;button.disabled=false;}
+    return;
+  }
+  if(!event.target.hasAttribute('data-image-file') || galleryUploading)return;
   const file=event.target.files[0];if(!file)return;
   if(file.size>5242880 || !['image/jpeg','image/png','image/webp'].includes(file.type)){statusLine.textContent='Choose a JPEG, PNG or WebP image up to 5 MB.';return;}
-  const button=document.querySelector('#productForm [type=submit]');button.disabled=true;statusLine.textContent='Uploading image…';
-  try {const result=await request('/images',{method:'POST',headers:{'Content-Type':file.type},body:await file.arrayBuffer()});document.getElementById('productImageUrl').value=result.url;statusLine.textContent='Image uploaded. Save the product to publish it.';}
-  catch(error){statusLine.textContent=error.message;}finally{button.disabled=false;}
+  const form=event.target.closest('#productForm');
+  const index=Number(event.target.dataset.imageFile);
+  const button=form.querySelector('[type=submit]');galleryUploading=true;button.disabled=true;statusLine.textContent='Uploading image…';
+  try {
+    const result=await request('/images',{method:'POST',headers:{'Content-Type':file.type},body:await file.arrayBuffer()});
+    if(document.getElementById('productForm')===form){galleryDraft[index]=result.url;renderImageEditor();statusLine.textContent='Image uploaded. Save the product to publish it.';}
+  }
+  catch(error){statusLine.textContent=error.message;}finally{galleryUploading=false;button.disabled=false;}
 });
 supabaseClient.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')showGate();});
 initialise();

@@ -87,8 +87,16 @@ Do not ship an unverified or test order as though it were a captured live paymen
 
 ## 5. Products
 
-Add/edit SKU, product name, description, MRP, selling price, stock and image.
-Uploads accept JPEG/PNG/WebP up to 5 MB with file-signature checks; SVG is excluded.
+Before deploying the six-photo editor, run
+`server/migrations/20261111_product_gallery.sql` in the production Supabase
+SQL Editor. Then deploy the updated backend and frontend.
+
+Add/edit SKU, product name, description, MRP, selling price, stock and up to
+six ordered product photos. The first photo is the cover shown in product cards.
+Choose several files together, upload or replace one photo at a time, paste an
+HTTPS URL, move a photo upward, or remove it. Existing catalog photos appear
+in the editor when opening an older product.
+Uploads accept JPEG/PNG/WebP up to 5 MB each with file-signature checks; SVG is excluded.
 Public product images live in the `product-images` Supabase Storage bucket.
 Upload permission is enforced by the admin backend, not public bucket policies.
 An upload is made public immediately; only upload product imagery, not private
@@ -102,7 +110,7 @@ revision number are rejected; reload and reapply the intended change.
 Saving a product and recording its activity commit in one database transaction.
 Activity history records the admin account ID, action, product and time.
 Cancelled edits can leave unused uploaded images; there is no automated asset
-cleanup in this initial version. Only the primary product image is editable.
+cleanup in this version.
 
 ## 6. Customers and analytics
 
