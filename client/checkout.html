@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout | Physiowaye</title>
-<link rel="stylesheet" href="css/style.css?v=frontend-12">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="css/style.css?v=nav-20261111">
 <link rel="stylesheet" href="css/checkout.css?v=checkout-5">
   <link rel="stylesheet" href="css/refinements.css?v=design-5">
 </head>
@@ -28,7 +29,7 @@
 </div>
 <aside class="checkout-sidebar"><section class="checkout-panel checkout-price-panel"><h2>Order summary</h2><div class="checkout-totals"><div><span id="subtotalLabel">Item subtotal</span><strong id="subtotal">—</strong></div><div id="savingsRow" hidden><span>Product savings</span><strong id="savings">—</strong></div><div><span>Additional charges</span><strong>₹0</strong></div></div><div class="checkout-total"><span>Total payable</span><strong id="grandTotal">—</strong></div><p class="checkout-price-note">Review this total before continuing to payment.</p><button id="payButton" class="checkout-pay-button" type="submit" disabled>Continue to payment <span aria-hidden="true">→</span></button><p id="checkoutStatus" role="status" aria-live="polite"></p><p class="checkout-payment-note">You’ll complete payment in the Razorpay window.</p></section><div class="checkout-help"><strong>A question about your order?</strong><p>Our team can help with products and ordering.</p><a href="https://wa.me/919540043453?text=Hello%20Physiowaye%2C%20I%20have%20a%20query%20regarding%20your%20physiotherapy%20machines%20and%20would%20like%20some%20assistance" target="_blank" rel="noopener noreferrer">Connect on WhatsApp ↗</a></div></aside>
 </form>
-<div class="checkout-bottom"><span>Physiowaye · Equipment for clinics and home care</span><a href="contact.html">Contact support</a></div>
+<div class="checkout-bottom"><span>Physiowaye · Equipment for clinics and home care</span><a href="shipping-returns.html" target="_blank" rel="noopener">Shipping &amp; returns</a><a href="terms.html" target="_blank" rel="noopener">Terms</a><a href="privacy.html" target="_blank" rel="noopener">Privacy</a><a href="contact.html">Contact support</a></div>
 </main>
 <div id="successModal" class="checkout-success" hidden role="dialog" aria-modal="true" aria-labelledby="successTitle"><div class="checkout-success-box"><span class="checkout-success-check" aria-hidden="true">✓</span><h2 id="successTitle">You’re all set!</h2><p id="orderMessage"></p><div class="success-receipt"><span>ORDER CONFIRMED</span><strong id="successReference"></strong><div><span>Payment verified</span><b id="successTotal"></b></div></div><p class="success-next">Next: our team prepares your equipment. Follow every update in your orders.</p><a id="viewOrders" href="orders.html" class="checkout-pay-button">View your order →</a></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/supabase-client.js"></script><script src="js/api.js"></script><script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="js/checkout.js?v=catalog-photos-20261111"></script>

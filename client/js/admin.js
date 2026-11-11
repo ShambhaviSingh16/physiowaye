@@ -18,6 +18,7 @@ const iconPaths = {
  orders:'M3 7h12v10H3z M15 10h3l3 4v3h-6 M6 7V4h7 M6 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M18 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4',
  products:'M3 7l9-4 9 4v10l-9 4-9-4z M3 7l9 4 9-4 M12 11v10',
  customers:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M17 4a4 4 0 0 1 0 7 M22 21v-2a4 4 0 0 0-3-4',
+ messages:'M3 5h18v12H7l-4 3V5z M7 9h10 M7 13h7',
  activity:'M21 12a9 9 0 1 1-3-6 M21 3v6h-6 M12 7v5l3 2',
  sales:'M12 3v18 M17 6H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H6',
  check:'M5 12l4 4L19 6',
@@ -32,7 +33,7 @@ function productThumb(product) {
 }
 
 let section='overview', currentPage=1, query='', orderStatus='', products=[], selectedProduct=null, customerId=null, requestRevision=0;
-const titles={overview:'Your store at a glance',orders:'Orders & shipments',products:'Your product catalog',customers:'Your customers',activity:'Activity history'};
+const titles={overview:'Your store at a glance',orders:'Orders & shipments',products:'Your product catalog',customers:'Your customers',messages:'Customer messages',activity:'Activity history'};
 async function request(path,options={}) {
   const response=await apiFetch(`/admin${path}`,options);
   const data=await response.json().catch(()=>({error:'The server could not complete this request.'}));
@@ -128,6 +129,8 @@ async function loadSection() {
       content.innerHTML=`<form id="adminSearch" class="toolbar"><input name="q" aria-label="Search products" placeholder="Search product name" value="${esc(query)}"><button>Search</button><button type="button" class="secondary" data-new-product>Add product +</button></form>${table(['Product','SKU','Price','Stock','Availability',''],data.rows.map(product=>`<tr><td><div class="product-cell">${productThumb(product)}<strong>${esc(product.product_name)}</strong></div></td><td>${esc(product.sku)}</td><td>${money(product.selling_price)}</td><td>${esc(product.stock)}</td><td>${badge(product.is_active?'Active':'Archived')}</td><td><button class="secondary" data-product="${product.id}">Edit</button></td></tr>`))}${pager(data)}`;
     } else if(section==='customers' && customerId) {
       content.innerHTML=`<button class="secondary" data-back>← All customers</button><section class="panel" style="margin-top:20px"><h2>${esc(data.customer.name || data.customer.email)}</h2>${customerDetails(data.customer)}<p>Addresses and delivery phone numbers are shown in each order below.</p></section>${ordersTable(data.rows)}${pager(data)}`;
+    } else if(section==='messages') {
+      content.innerHTML=`<p>Messages sent through the website contact form appear here. Reply using the customer email shown with each message.</p>${table(['Received','Name','Email','Message'],data.rows.map(item=>`<tr><td>${esc(date(item.created_at))}</td><td>${esc(item.name)}</td><td>${esc(item.email)}</td><td class="message-copy">${esc(item.message)}</td></tr>`))}${pager(data)}`;
     } else if(section==='customers') {
       content.innerHTML=`<p>Contact details reflect information actually provided. Open a customer to view their order addresses.</p>${table(['Customer','Email / phone','Sign-in provider','Account created','Last sign-in',''],data.rows.map(user=>`<tr><td>${esc(user.name||'Name not provided')}</td><td>${esc(user.email)}<br>${esc(user.phone||'Phone not provided')}</td><td>${esc(user.providers.join(', ') || 'Not available')}</td><td>${esc(date(user.created_at))}</td><td>${esc(date(user.last_sign_in_at))}</td><td><button class="secondary" data-customer="${esc(user.id)}">View customer</button></td></tr>`))}${pager(data)}`;
     } else {

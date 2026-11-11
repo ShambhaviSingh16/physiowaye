@@ -43,6 +43,34 @@ app.post('/api/razorpay-webhook', express.raw({ type: 'application/json' }), asy
 app.use(express.json());
 app.use('/api/admin', require('./admin'));
 
+const contactAttempts = new Map();
+app.post('/api/contact', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const name = String(req.body?.name || '').trim();
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const message = String(req.body?.message || '').trim();
+  if (req.body?.website) return res.status(202).json({ ok: true });
+  if (name.length < 2 || name.length > 120 || email.length > 254 ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || message.length < 10 || message.length > 4000) {
+    return res.status(400).json({ error: 'Please check your name, email and message.' });
+  }
+  const now = Date.now();
+  if (contactAttempts.size > 10000) contactAttempts.clear();
+  const key = crypto.createHash('sha256').update(email).digest('hex');
+  const attempt = contactAttempts.get(key);
+  const count = attempt && now - attempt.since < 15 * 60 * 1000 ? attempt.count : 0;
+  if (count >= 3) return res.status(429).json({ error: 'Please wait before sending another message.' });
+  try {
+    const { error } = await supabase.from('contact_messages').insert({ name, email, message });
+    if (error) throw error;
+    contactAttempts.set(key, { count: count + 1, since: count ? attempt.since : now });
+    res.status(201).json({ ok: true });
+  } catch (error) {
+    console.error('Contact message could not be saved', error.message);
+    res.status(503).json({ error: 'Your message could not be sent. Please email us directly.' });
+  }
+});
+
 async function confirmCapturedPayment(checkout, payment) {
   if (payment.order_id !== checkout.razorpay_order_id || Number(payment.amount) !== Number(checkout.amount) || payment.currency !== 'INR' || payment.status !== 'captured') throw new Error('Payment capture is not confirmed.');
   const { data, error } = await supabase.rpc('confirm_paid_order', {
@@ -118,7 +146,17 @@ app.post("/api/cart", async (req, res) => {
 
     console.log("CART REQUEST:", req.body);
 
-    const { product_id, quantity } = req.body;
+    const product_id = Number(req.body?.product_id);
+    const quantity = Number(req.body?.quantity);
+    if (!Number.isSafeInteger(product_id) || product_id < 1 || !Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
+      return res.status(400).json({ message: 'Please choose a valid product quantity.' });
+    }
+    const { data: product, error: productError } = await supabase.from('products')
+      .select('stock,is_active').eq('id', product_id).maybeSingle();
+    if (productError) throw productError;
+    if (!product?.is_active || Number(product.stock) < quantity) {
+      return res.status(409).json({ message: 'This quantity is not available.' });
+    }
     const user_id = req.user.id;
 
     const { data: existing, error: existingError } =
@@ -129,10 +167,15 @@ app.post("/api/cart", async (req, res) => {
         .eq("product_id", product_id)
         .maybeSingle();
 
+    if (existingError) throw existingError;
     console.log("EXISTING:", existing);
     console.log("EXISTING ERROR:", existingError);
 
     if (existing) {
+
+      if (Number(existing.quantity) + quantity > Math.min(100, Number(product.stock))) {
+        return res.status(409).json({ message: 'This quantity is not available.' });
+      }
 
       const { error } = await supabase
         .from("cart")
@@ -253,7 +296,17 @@ app.put("/api/cart/:cartId", async (req, res) => {
 
   try {
 
-    const { quantity } = req.body;
+    const quantity = Number(req.body?.quantity);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
+      return res.status(400).json({ message: 'Please choose a valid product quantity.' });
+    }
+    const { data: cartItem, error: cartError } = await supabase.from('cart')
+      .select('product_id,products(stock,is_active)').eq('id', req.params.cartId)
+      .eq('user_id', req.user.id).maybeSingle();
+    if (cartError) throw cartError;
+    if (!cartItem || !cartItem.products?.is_active || Number(cartItem.products.stock) < quantity) {
+      return res.status(409).json({ message: 'This quantity is not available.' });
+    }
 
     const { error } = await supabase
       .from("cart")

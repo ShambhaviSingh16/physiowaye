@@ -23,6 +23,13 @@ const wrap = handler => async (req,res) => {
   try { await handler(req,res); } catch (_) { res.status(500).json({ error: 'This action could not be completed. Please try again or contact your developer.' }); }
 };
 router.get('/me', (req,res) => res.json({ email: req.user.email }));
+router.get('/messages', wrap(async (req,res) => {
+  const { data,error,count } = await supabase.from('contact_messages')
+    .select('id,name,email,message,created_at',{count:'exact'})
+    .order('created_at',{ascending:false}).range(...range(req));
+  if (error) throw error;
+  res.json({rows:data,total:count,page:page(req),size});
+}));
 router.get('/overview', wrap(async (req,res) => {
   const { data,error } = await supabase.rpc('admin_store_metrics');
   if (error) throw error;

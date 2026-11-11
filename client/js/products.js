@@ -96,7 +96,7 @@ function createProductCard(product) {
   addButton.className = "product-card-button product-card-add";
   addButton.textContent = inStock ? "Add to cart" : "Out of stock";
   addButton.disabled = !inStock;
-  addButton.addEventListener("click", () => addCatalogProductToCart(product.id, addButton));
+  addButton.addEventListener("click", () => addCatalogProductToCart(product.id, addButton, Number(product.stock)));
 
   const buyButton = document.createElement("button");
   buyButton.type = "button";
@@ -129,7 +129,13 @@ async function requireCatalogSession(action, productId) {
   return false;
 }
 
-async function addCatalogProductToCart(productId, button) {
+async function addCatalogProductToCart(productId, button, stock) {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    showToast(addGuestCartItem(productId, stock) ? 'Added to your cart' : 'No more stock is available for this item.');
+    updateCartCount();
+    return;
+  }
   if (!(await requireCatalogSession("add", productId))) return;
   button.disabled = true;
   try {

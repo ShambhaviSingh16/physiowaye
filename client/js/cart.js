@@ -1,175 +1,95 @@
-const user = sessionStorage.getItem("user");
-if (!user) {
-  alert("Please login to view cart");
-  window.location.href = "login.html";
-}
-// const API = "http://localhost:5000/api";
-const cartItemsDiv = document.getElementById("cartItems");
-const totalDiv = document.getElementById("total");
+const cartItemsDiv = document.getElementById('cartItems');
+const totalDiv = document.getElementById('total');
+const cartStatus = document.getElementById('cartStatus');
+const checkoutLink = document.getElementById('checkoutLink');
+const cartMoney = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+const cartEscape = value => String(value ?? '').replace(/[&<>"']/g, char =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+let cartSession = null;
 
 async function loadCart() {
-
-  const userObj =
-    JSON.parse(sessionStorage.getItem("user"));
-
-  const res = await apiFetch(`/cart/${userObj.id}`);
-
-  const cart = await res.json();
-
-  if (!cart.length) {
-
-    cartItemsDiv.innerHTML = `
-
-<div class="empty-cart">
-
-<h2>🛒</h2>
-
-<h3>Your Cart Is Empty</h3>
-
-<p>
-Browse our physiotherapy products
-and add items to your cart.
-</p>
-
-<a href="products.html"
-class="btn-primary">
-
-Browse Products
-
-</a>
-
-</div>
-
-`;
-
-    totalDiv.innerText = "";
-
-    return;
-
+  cartStatus.textContent = '';
+  cartItemsDiv.setAttribute('aria-busy', 'true');
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    cartSession = session;
+    let items;
+    if (session) {
+      try { await syncGuestCart(); } catch (error) { cartStatus.textContent = error.message; }
+      const response = await apiFetch(`/cart/${encodeURIComponent(session.user.id)}`);
+      if (!response.ok) throw new Error('Your cart could not be loaded. Please try again.');
+      items = (await response.json()).map(item => ({ id: item.id, quantity: item.quantity, product: item.products }));
+    } else {
+      items = (await Promise.all(guestCartItems().map(async item => {
+        const response = await apiFetch(`/products/${item.productId}`);
+        if (!response.ok) return null;
+        const product = await response.json();
+        return product.is_active && Number(product.stock) > 0
+          ? { id: item.productId, quantity: item.quantity, product } : null;
+      }))).filter(Boolean);
+    }
+    renderCart(items);
+    updateCartCount();
+  } catch (error) {
+    cartStatus.textContent = error.message;
+    cartItemsDiv.replaceChildren();
+    totalDiv.textContent = '';
+  } finally {
+    cartItemsDiv.removeAttribute('aria-busy');
   }
-
-  let total = 0;
-
-  cartItemsDiv.innerHTML = "";
-
-  for (const item of cart) {
-
-    const product = item.products;
-
-    const itemTotal =
-      product.selling_price * item.quantity;
-
-    total += itemTotal;
-
-   cartItemsDiv.innerHTML += `
-
-<div class="cart-item">
-
-  <div class="cart-image">
-    <img
-      src="${
-        product.image_url ||
-        `assets/images/products/${String(product.sku || "").toLowerCase()}.jpg?v=catalog-20261111`
-      }"
-      alt="${product.product_name}">
-  </div>
-
-  <div class="cart-info">
-
-    <h3>${product.product_name}</h3>
-
-    <p class="price">
-      ₹${product.selling_price}
-    </p>
-
-    <div class="cart-controls">
-
-      <button
-      onclick="changeQty(${item.id}, ${item.quantity}, -1)">
-      −
-      </button>
-
-      <span>${item.quantity}</span>
-
-      <button
-      onclick="changeQty(${item.id}, ${item.quantity}, 1)">
-      +
-      </button>
-
-      <button
-      class="remove-btn"
-      onclick="removeItem(${item.id})">
-      Remove
-      </button>
-
-    </div>
-
-    <p>
-      ₹${product.selling_price}
-      ×
-      ${item.quantity}
-      =
-      ₹${itemTotal}
-    </p>
-
-  </div>
-
-</div>
-
-`;
-
-  }
-
-  totalDiv.innerText =
-    `Total: ₹${total}`;
-
 }
+
+function renderCart(items) {
+  cartItemsDiv.replaceChildren();
+  checkoutLink.hidden = items.length === 0;
+  if (!items.length) {
+    cartItemsDiv.innerHTML = '<div class="empty-cart"><h2>Your cart is empty</h2><p>Browse our physiotherapy equipment and add items to your cart.</p><a href="products.html" class="btn-primary">Browse products</a></div>';
+    totalDiv.textContent = '';
+    return;
+  }
+  let total = 0;
+  items.forEach(item => {
+    const product = item.product;
+    const quantity = Math.min(Number(item.quantity) || 1, Number(product.stock) || 1);
+    const lineTotal = Number(product.selling_price) * quantity;
+    total += lineTotal;
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+    row.innerHTML = `<div class="cart-image"><img src="${cartEscape(product.image_url || `assets/images/products/${String(product.sku || '').toLowerCase()}.jpg?v=catalog-20261111`)}" alt="${cartEscape(product.product_name)}"></div><div class="cart-info"><h3>${cartEscape(product.product_name)}</h3><p class="price">${cartMoney.format(Number(product.selling_price))}</p><div class="cart-controls"><button type="button" data-action="decrease" data-id="${cartEscape(item.id)}" aria-label="Decrease quantity of ${cartEscape(product.product_name)}">−</button><span>${quantity}</span><button type="button" data-action="increase" data-id="${cartEscape(item.id)}" aria-label="Increase quantity of ${cartEscape(product.product_name)}" ${quantity >= Number(product.stock) ? 'disabled' : ''}>+</button><button type="button" class="remove-btn" data-action="remove" data-id="${cartEscape(item.id)}">Remove</button></div><p>${cartMoney.format(Number(product.selling_price))} × ${quantity} = ${cartMoney.format(lineTotal)}</p></div>`;
+    cartItemsDiv.append(row);
+  });
+  totalDiv.textContent = `Total: ${cartMoney.format(total)}`;
+}
+
+cartItemsDiv.addEventListener('click', async event => {
+  const button = event.target.closest('button[data-action]');
+  if (!button) return;
+  button.disabled = true;
+  const id = Number(button.dataset.id);
+  const row = button.closest('.cart-item');
+  const current = Number(row.querySelector('.cart-controls span').textContent);
+  const next = button.dataset.action === 'increase' ? current + 1 : current - 1;
+  try {
+    if (cartSession) {
+      const response = await apiFetch(`/cart/${id}`, button.dataset.action === 'remove' || next <= 0
+        ? { method: 'DELETE' }
+        : { method: 'PUT', body: JSON.stringify({ quantity: next }) });
+      if (!response.ok) throw new Error('The cart could not be updated. Please try again.');
+    } else {
+      setGuestCartQuantity(id, button.dataset.action === 'remove' ? 0 : next);
+    }
+    await loadCart();
+  } catch (error) {
+    cartStatus.textContent = error.message;
+    button.disabled = false;
+  }
+});
+
+checkoutLink.addEventListener('click', event => {
+  if (cartSession) return;
+  event.preventDefault();
+  sessionStorage.setItem('physiowaye_pending_purchase', JSON.stringify({ action: 'checkoutCart' }));
+  window.location.href = 'login.html';
+});
 
 loadCart();
-updateCartCount();
-async function changeQty(cartId, currentQty, change) {
-
-  const newQty = currentQty + change;
-
-  if (newQty <= 0) {
-
-    await apiFetch(
-      `/cart/${cartId}`,
-      {
-        method: "DELETE"
-      }
-    );
-
-  } else {
-
-    await apiFetch(
-      `/cart/${cartId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          quantity: newQty
-        })
-      }
-    );
-
-  }
-
-  loadCart();
-  updateCartCount();
-}
-
-async function removeItem(cartId) {
-
-  await apiFetch(
-    `/cart/${cartId}`,
-    {
-      method: "DELETE"
-    }
-  );
-
-  loadCart();
-  updateCartCount();
-}

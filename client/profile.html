@@ -5,8 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Your Profile | Physiowaye</title>
+    <meta name="robots" content="noindex,nofollow">
 
-    <link rel="stylesheet" href="css/style.css?v=frontend-11">
+    <link rel="stylesheet" href="css/style.css?v=nav-20261111">
     <link rel="stylesheet" href="css/responsive.css?v=frontend-11">
   <link rel="stylesheet" href="css/refinements.css?v=design-5">
 </head>
@@ -49,11 +50,11 @@
 
 
             <!-- Mobile Menu Icon -->
-            <div class="menu-toggle" id="menuToggle">
+            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-controls="navLinks" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
+            </button>
 
         </div>
     </header>
@@ -122,7 +123,7 @@
 
     <div class="footer-bottom">
       <p>© 2026 Physiowaye</p>
-      <p>Equipment for clinics and home care</p>
+      <p>Equipment for clinics and home care</p><nav class="footer-policy-links" aria-label="Store information"><a href="shipping-returns.html">Shipping &amp; returns</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a></nav>
       <button class="footer-top-button" type="button">Back to top <span aria-hidden="true">↑</span></button>
     </div>
   </div>
@@ -131,9 +132,9 @@
 </body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-client.js"></script>
-<script src="js/api.js"></script>
-<script src="js/auth.js?v=nav-2"></script>
-<script src="js/main.js"></script>
+<script src="js/api.js"></script><script src="js/guest-cart.js?v=guest-cart-20261111"></script>
+<script src="js/auth.js?v=guest-cart-20261111"></script>
+<script src="js/main.js?v=nav-20261111"></script>
 <script src="js/profile.js"></script>
 
 </html>

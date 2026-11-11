@@ -36,6 +36,9 @@ async function login() {
     JSON.stringify(data.user)
   );
 
+  try { await syncGuestCart(); }
+  catch (syncError) { error.innerText = syncError.message; return; }
+
   if (await completePendingPurchase()) return;
 
   window.location.href = "products.html";
@@ -177,13 +180,22 @@ document.addEventListener(
       ordersBtn?.classList.remove("hidden");
       profileBtn?.classList.remove("hidden");
 
-      if (await completePendingPurchase()) return;
+      let cartSynced = true;
+      try { await syncGuestCart(); }
+      catch (syncError) {
+        cartSynced = false;
+        console.error(syncError);
+        const loginError = document.getElementById('loginError');
+        if (loginError) loginError.textContent = syncError.message;
+      }
+
+      if (cartSynced && await completePendingPurchase()) return;
 
     } else {
 
       loginBtn?.classList.remove("hidden");
       logoutBtn?.classList.add("hidden");
-      cartBtn?.classList.add("hidden");
+      cartBtn?.classList.remove("hidden");
       ordersBtn?.classList.add("hidden");
       profileBtn?.classList.add("hidden");
     }
@@ -205,6 +217,11 @@ async function completePendingPurchase() {
     return false;
   }
 
+  if (pending.action === 'checkoutCart') {
+    sessionStorage.removeItem('physiowaye_pending_purchase');
+    window.location.replace('checkout.html');
+    return true;
+  }
   const productId = String(pending.productId || "");
   if (!/^[\w-]+$/.test(productId)) {
     sessionStorage.removeItem("physiowaye_pending_purchase");
@@ -245,7 +262,11 @@ async function updateCartCount() {
       sessionStorage.getItem("user")
     );
 
-  if (!user) return;
+  if (!user) {
+    const badge = document.getElementById('cartCount');
+    if (badge) badge.innerText = guestCartItems().reduce((sum, item) => sum + item.quantity, 0);
+    return;
+  }
 
   try {
 

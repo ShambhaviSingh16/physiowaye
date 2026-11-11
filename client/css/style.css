@@ -1000,9 +1000,20 @@ body {
   display: none;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
   cursor: pointer;
   z-index: 1001;
+}
+
+.menu-toggle:focus-visible {
+  outline: 3px solid #168fc8;
+  outline-offset: 3px;
 }
 
 .menu-toggle span {
@@ -2465,6 +2476,10 @@ textarea:focus-visible {
 }
 
 .footer-top-button { display: inline-flex; align-items: center; gap: 8px; padding: 5px 0 5px 10px; border: 0; background: none; color: #c5d7e8; font: inherit; cursor: pointer; transition: color .18s ease; }
+.footer-policy-links { display: flex; flex-wrap: wrap; gap: 8px 15px; }
+.footer-policy-links a { color: #c5d7e8; text-decoration: none; }
+.footer-policy-links a:hover { color: #8bdef7; text-decoration: underline; }
+.footer-bottom { flex-wrap: wrap; }
 .footer-top-button:hover { color: #8bdef7; }
 
 @media (max-width: 768px) {

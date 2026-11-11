@@ -1,50 +1,28 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const menuToggle = document.getElementById("menuToggle");
-  const navLinks = document.getElementById("navLinks");
-  const navItems = navLinks.querySelectorAll("a");
+document.addEventListener('DOMContentLoaded', () => {
+  const menuToggle = document.getElementById('menuToggle');
+  const navLinks = document.getElementById('navLinks');
+  if (!menuToggle || !navLinks) return;
 
-  // Toggle menu open / close using SAME icon
-  menuToggle.addEventListener("click", () => {
-    const isOpen = navLinks.classList.contains("active");
+  const setOpen = open => {
+    navLinks.classList.toggle('active', open);
+    menuToggle.classList.toggle('active', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+    menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  };
 
-    if (isOpen) {
-      navLinks.classList.remove("active");
-      menuToggle.classList.remove("active"); // back to ☰
-    } else {
-      navLinks.classList.add("active");
-      menuToggle.classList.add("active"); // transform to ✖
+  menuToggle.addEventListener('click', () => {
+    setOpen(menuToggle.getAttribute('aria-expanded') !== 'true');
+  });
+  navLinks.addEventListener('click', event => {
+    if (event.target.closest('a')) setOpen(false);
+  });
+  document.addEventListener('click', event => {
+    if (!navLinks.contains(event.target) && !menuToggle.contains(event.target)) setOpen(false);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      menuToggle.focus();
     }
   });
-
-  // Close menu when any nav link is clicked
-  navItems.forEach(item => {
-    item.addEventListener("click", () => {
-      navLinks.classList.remove("active");
-      menuToggle.classList.remove("active");
-    });
-  });
-
-  document.addEventListener("click", (e) => {
-
-    const navLinks = document.getElementById("navLinks");
-
-    const toggle = document.getElementById("menuToggle");
-
-    if (!navLinks.contains(e.target) && !toggle.contains(e.target)) {
-
-      navLinks.classList.remove("active");
-
-      toggle.classList.remove("active");
-
-    }
-
-  });
-});
-document.querySelectorAll(".nav-links a").forEach(link => {
-link.addEventListener("click", () => {
-
-navLinks.classList.remove("active");
-toggle.classList.remove("active");
-
-});
 });

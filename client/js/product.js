@@ -12,6 +12,47 @@ const formatINR = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 0
 });
 
+function updateProductMetadata(product, imageSource) {
+  const title = `${product.product_name || 'Physiotherapy equipment'} | Physiowaye`;
+  const summary = String(product.description || 'Physiotherapy equipment from Physiowaye.')
+    .replace(/\s+/g, ' ').trim().slice(0, 155);
+  const url = new URL('product.html', window.location.href);
+  url.searchParams.set('id', String(product.id));
+  document.title = title;
+  const description = document.querySelector('meta[name="description"]');
+  if (description) description.content = summary;
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    document.head.append(canonical);
+  }
+  canonical.href = url.href;
+  let structuredData = document.getElementById('productStructuredData');
+  if (!structuredData) {
+    structuredData = document.createElement('script');
+    structuredData.id = 'productStructuredData';
+    structuredData.type = 'application/ld+json';
+    document.head.append(structuredData);
+  }
+  structuredData.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.product_name,
+    description: product.description,
+    sku: product.sku,
+    image: imageSource ? new URL(imageSource, document.baseURI).href : undefined,
+    brand: { '@type': 'Brand', name: 'Physiowaye' },
+    offers: {
+      '@type': 'Offer',
+      url: url.href,
+      priceCurrency: 'INR',
+      price: Number(product.selling_price),
+      availability: Number(product.stock) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
+    }
+  }).replace(/</g, '\\u003c');
+}
+
 function renderProduct(product) {
   productCard.replaceChildren();
 
@@ -22,6 +63,7 @@ function renderProduct(product) {
   visual.className = "product-gallery";
   const sku = String(product.sku || "").toLowerCase();
   const localImage = sku ? `assets/images/products/${sku}.jpg?v=catalog-20261111` : null;
+  updateProductMetadata(product, product.image_url || localImage);
   const viewsImage = sku ? `assets/images/products/${sku}-views.jpg` : null;
   const gallerySheetUrl = viewsImage ? new URL(viewsImage, document.baseURI).href : (localImage ? new URL(localImage, document.baseURI).href : "");
   const galleryMain = document.createElement("div");
@@ -191,7 +233,7 @@ function renderProduct(product) {
   addButton.className = "btn-primary product-add-button";
   addButton.textContent = inStock ? "Add to cart" : "Unavailable";
   addButton.disabled = !inStock;
-  addButton.addEventListener("click", () => addToCart(product.id));
+  addButton.addEventListener("click", () => addToCart(product.id, Number(product.stock)));
 
   const buyButton = document.createElement("button");
   buyButton.type = "button";
@@ -238,11 +280,11 @@ async function loadProduct() {
   }
 }
 
-async function addToCart(id) {
+async function addToCart(id, stock) {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) {
-    sessionStorage.setItem("physiowaye_pending_purchase", JSON.stringify({ action: "add", productId: id }));
-    window.location.href = "login.html";
+    showToast(addGuestCartItem(id, stock) ? 'Added to your cart' : 'No more stock is available for this item.');
+    updateCartCount();
     return;
   }
 

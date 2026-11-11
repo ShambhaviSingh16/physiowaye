@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact | Physiowaye</title>
-  <link rel="stylesheet" href="css/style.css?v=frontend-11">
+  <meta name="description" content="Contact Physiowaye about physiotherapy equipment, orders or delivery. Reach our team by form, email, phone or WhatsApp.">
+  <link rel="canonical" href="https://www.physiowaye.com/contact.html">
+  <link rel="stylesheet" href="css/style.css?v=nav-20261111">
   <link rel="stylesheet" href="css/responsive.css?v=frontend-11">
   <link rel="stylesheet" href="css/refinements.css?v=design-5">
 </head>
@@ -48,11 +50,11 @@
 
 
       <!-- Mobile Menu Icon -->
-      <div class="menu-toggle" id="menuToggle">
+      <button type="button" class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-controls="navLinks" aria-expanded="false">
         <span></span>
         <span></span>
         <span></span>
-      </div>
+      </button>
 
     </div>
   </header>
@@ -77,12 +79,13 @@
       <p>Tell us a little about what you need and we’ll help you take it from there.</p>
       <form class="contact-form" id="contactForm">
         <div class="form-group">
-          <div><label for="contactName">Your name</label><input id="contactName" name="name" type="text" autocomplete="name" placeholder="e.g. Priya Sharma" required></div>
-          <div><label for="contactEmail">Email address</label><input id="contactEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+          <div><label for="contactName">Your name</label><input id="contactName" name="name" type="text" autocomplete="name" maxlength="120" placeholder="e.g. Priya Sharma" required></div>
+          <div><label for="contactEmail">Email address</label><input id="contactEmail" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required></div>
         </div>
-        <div><label for="contactMessage">How can we help?</label><textarea id="contactMessage" name="message" placeholder="Product question, order support, or anything else…" required></textarea></div>
-        <button type="submit" class="btn-primary">Open email to send <span aria-hidden="true">→</span></button>
-        <p class="contact-form-note">This will open your email app with your message ready to send.</p>
+        <div><label for="contactMessage">How can we help?</label><textarea id="contactMessage" name="message" minlength="10" maxlength="4000" placeholder="Product question, order support, or anything else…" required></textarea></div>
+        <div hidden aria-hidden="true"><label for="contactWebsite">Website</label><input id="contactWebsite" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+        <button type="submit" class="btn-primary">Send message <span aria-hidden="true">→</span></button>
+        <p id="contactStatus" class="contact-form-note" role="status" aria-live="polite">Your message will be sent to our team.</p>
       </form>
     </div>
   </section>
@@ -133,7 +136,7 @@
 
     <div class="footer-bottom">
       <p>© 2026 Physiowaye</p>
-      <p>Equipment for clinics and home care</p>
+      <p>Equipment for clinics and home care</p><nav class="footer-policy-links" aria-label="Store information"><a href="shipping-returns.html">Shipping &amp; returns</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a></nav>
       <button class="footer-top-button" type="button">Back to top <span aria-hidden="true">↑</span></button>
     </div>
   </div>
@@ -143,11 +146,11 @@
 <script src="js/footer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-client.js"></script>
-<script src="js/api.js"></script>
-<script src="js/auth.js?v=nav-2"></script>
+<script src="js/api.js"></script><script src="js/guest-cart.js?v=guest-cart-20261111"></script>
+<script src="js/auth.js?v=guest-cart-20261111"></script>
 
-<script src="js/main.js"></script>
-<script src="js/contact.js?v=brand-1"></script>
+<script src="js/main.js?v=nav-20261111"></script>
+<script src="js/contact.js?v=site-fixes-20261111"></script>
 </body>
 </html>
 
