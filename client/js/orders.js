@@ -53,11 +53,19 @@ function renderOrder(order) {
   card.querySelectorAll('.order-product img').forEach(img => { img.onerror = () => { img.onerror = null; img.src = 'assets/images/logo.png'; }; });
   return card;
 }
+function reportOrdersError(message, detail, title) {
+  ordersStatus.setAttribute('role', 'alert');
+  ordersStatus.setAttribute('aria-live', 'assertive');
+  ordersStatus.textContent = message;
+  showToast(detail, { type: 'error', title, announce: false });
+}
 function render() {
+  ordersStatus.setAttribute('role', 'status');
+  ordersStatus.setAttribute('aria-live', 'polite');
   if (isOrderDetail) {
     const order = orders.find(order => order.reference === selectedReference);
     list.replaceChildren();
-    if (!order) { ordersStatus.textContent = 'This order could not be found in your account.'; return; }
+    if (!order) { reportOrdersError('This order could not be found in your account.', 'Check the order link or return to your orders.', 'Order not found'); return; }
     ordersStatus.textContent = 'Your items, payment and delivery information.';
     list.append(renderOrder(order));
     if (location.hash === '#tracking') requestAnimationFrame(() => document.getElementById('tracking').scrollIntoView({ block: 'start' }));
@@ -81,7 +89,7 @@ async function loadOrders() {
     const {data:{session}} = await supabaseClient.auth.getSession();
     if (!session) { location.replace('login.html'); return; }
     const response = await apiFetch(isOrderDetail ? `/orders/detail/${encodeURIComponent(selectedReference || '')}` : `/orders/${encodeURIComponent(session.user.id)}`);
-    if (response.status === 404 && isOrderDetail) { ordersStatus.textContent = 'This order could not be found in your account.'; list.replaceChildren(); return; }
+    if (response.status === 404 && isOrderDetail) { reportOrdersError('This order could not be found in your account.', 'Check the order link or return to your orders.', 'Order not found'); list.replaceChildren(); return; }
     if (!response.ok) throw new Error('Unable to load orders');
     const result = await response.json();
     orders = isOrderDetail ? [result] : result;
@@ -89,7 +97,7 @@ async function loadOrders() {
     render();
     if (isOrderDetail) refreshCourierTracking(orders[0]);
   } catch (_) {
-    ordersStatus.textContent = 'Your orders could not be loaded.';
+    reportOrdersError('Your orders could not be loaded.', 'Please try loading your orders again.', 'Orders unavailable');
     list.innerHTML = '<section class="orders-empty"><h3>Let’s try that again.</h3><p>We couldn’t reach your order history.</p><button id="retryOrders" type="button">Retry</button></section>';
     document.getElementById('retryOrders').onclick = loadOrders;
   } finally { list.setAttribute('aria-busy','false'); }

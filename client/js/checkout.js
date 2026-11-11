@@ -59,8 +59,16 @@ let checkoutUser;
 let paymentBusy = false;
 let recordingOrder = false;
 let orderCompleted = false;
+let paymentFailed = false;
 function escapeHTML(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]); }
 function setBusy(busy) { paymentBusy = busy; payButton.disabled = busy; payButton.textContent = busy ? 'Opening payment…' : 'Continue to payment →'; }
+function setCheckoutNotice(message, type = 'error', title = 'Checkout needs attention') {
+  statusMessage.dataset.state = type;
+  statusMessage.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  statusMessage.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+  statusMessage.textContent = message;
+  showToast(message, { type, title, announce: false });
+}
 async function getCheckoutLines() {
   const response = await apiFetch(buyNowProductId ? `/products/${encodeURIComponent(buyNowProductId)}` : `/cart/${checkoutUser.id}`);
   if (!response.ok) throw new Error('We could not load your order. Please try again.');
@@ -115,13 +123,13 @@ async function initializeCheckout() {
     const lines = await getCheckoutLines();
     if (!lines.length) { summary.innerHTML = '<div class="empty-checkout">Your bag is empty. <a href="products.html">Explore equipment →</a></div>'; document.getElementById('reviewCount').textContent = 'No items to check out'; return; }
     renderLines(lines); payButton.disabled = false;
-  } catch (error) { summary.innerHTML = '<div class="empty-checkout">We could not load your items. <a href="checkout.html">Try again</a></div>'; statusMessage.textContent = error.message; }
+  } catch (error) { summary.innerHTML = '<div class="empty-checkout">We could not load your items. <a href="checkout.html">Try again</a></div>'; setCheckoutNotice(error.message, 'error', 'Order unavailable'); }
   finally { summary.removeAttribute('aria-busy'); }
 }
 form.addEventListener('submit', async event => {
   event.preventDefault();
   if (paymentBusy || !checkoutUser || !form.reportValidity()) return;
-  statusMessage.textContent = ''; setBusy(true);
+  statusMessage.textContent = ''; statusMessage.dataset.state = ''; paymentFailed = false; setBusy(true);
   try {
     const lines = await getCheckoutLines();
     if (!lines.length) throw new Error('Your bag is empty.');
@@ -139,7 +147,7 @@ form.addEventListener('submit', async event => {
       key: paymentOrder.key_id, amount: paymentOrder.amount, currency: 'INR', name: 'Physiowaye', description: 'Equipment order', order_id: paymentOrder.id,
       prefill: { name: document.getElementById('name').value.trim(), email: document.getElementById('email').value.trim(), contact: document.getElementById('phone').value.trim() },
       theme: { color: '#158ec1' },
-      modal: { ondismiss: () => { if (recordingOrder || orderCompleted) return; setBusy(false); statusMessage.textContent = 'Payment was closed. You can continue when you are ready.'; } },
+      modal: { ondismiss: () => { if (recordingOrder || orderCompleted || paymentFailed) return; setBusy(false); setCheckoutNotice('You can continue when you are ready.', 'info', 'Payment window closed'); } },
       handler: async function (paymentResult) {
         recordingOrder = true; payButton.textContent = 'Confirming your order…';
         try {
@@ -156,12 +164,12 @@ form.addEventListener('submit', async event => {
           document.querySelector('.checkout-shell').inert = true;
           document.querySelector('.checkout-header').inert = true;
           document.getElementById('viewOrders').focus();
-        } catch (error) { statusMessage.textContent = error.message; payButton.textContent = 'Please contact support'; }
+        } catch (error) { setCheckoutNotice(error.message, 'error', 'Order needs assistance'); payButton.textContent = 'Please contact support'; }
       }
     });
-    payment.on('payment.failed', () => { if (recordingOrder || orderCompleted) return; setBusy(false); statusMessage.textContent = 'Payment was not completed. Check its status before trying again.'; });
+    payment.on('payment.failed', () => { if (recordingOrder || orderCompleted) return; paymentFailed = true; setBusy(false); setCheckoutNotice('Check your payment status before trying again.', 'error', 'Payment not completed'); });
     payment.open();
-  } catch (error) { setBusy(false); statusMessage.textContent = error.message; }
+  } catch (error) { setBusy(false); setCheckoutNotice(error.message); }
 });
 initializeCheckout();
 document.getElementById('successModal').addEventListener('keydown', event => {

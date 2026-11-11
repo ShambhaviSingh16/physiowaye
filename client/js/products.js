@@ -170,7 +170,10 @@ function showImageFallback(media) {
   media.textContent = "Physiotherapy equipment";
 }
 
+let productsUnavailableNotified = false;
 async function loadProducts(search = "") {
+  productsStatus.setAttribute('role', 'status');
+  productsStatus.setAttribute('aria-live', 'polite');
   productsStatus.textContent = "Loading products…";
   grid.setAttribute("aria-busy", "true");
 
@@ -179,6 +182,7 @@ async function loadProducts(search = "") {
     if (!response.ok) throw new Error("Product request failed");
 
     const products = await response.json();
+    productsUnavailableNotified = false;
     grid.replaceChildren();
 
     if (!Array.isArray(products) || products.length === 0) {
@@ -192,7 +196,13 @@ async function loadProducts(search = "") {
     productsStatus.textContent = `${products.length} ${products.length === 1 ? "product" : "products"} available`;
   } catch (error) {
     console.error("Unable to load products:", error);
+    productsStatus.setAttribute('role', 'alert');
+    productsStatus.setAttribute('aria-live', 'assertive');
     productsStatus.textContent = "We couldn’t load products. Please try again.";
+    if (!productsUnavailableNotified) {
+      showToast('Please refresh and try again.', { type: 'error', title: 'Products unavailable', announce: false });
+      productsUnavailableNotified = true;
+    }
   } finally {
     grid.removeAttribute("aria-busy");
   }

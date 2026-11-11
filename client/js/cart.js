@@ -9,13 +9,24 @@ let cartSession = null;
 
 async function loadCart() {
   cartStatus.textContent = '';
+  cartStatus.dataset.state = 'idle';
+  cartStatus.setAttribute('role', 'status');
+  cartStatus.setAttribute('aria-live', 'polite');
   cartItemsDiv.setAttribute('aria-busy', 'true');
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     cartSession = session;
     let items;
+    let syncFailed = false;
     if (session) {
-      try { await syncGuestCart(); } catch (error) { cartStatus.textContent = error.message; }
+      try { await syncGuestCart(); } catch (error) {
+        syncFailed = true;
+        cartStatus.dataset.state = 'error';
+        cartStatus.setAttribute('role', 'alert');
+        cartStatus.setAttribute('aria-live', 'assertive');
+        cartStatus.textContent = error.message;
+        showToast('Some guest items could not be moved to your account.', { type: 'error', title: 'Cart sync incomplete', announce: false });
+      }
       const response = await apiFetch(`/cart/${encodeURIComponent(session.user.id)}`);
       if (!response.ok) throw new Error('Your cart could not be loaded. Please try again.');
       items = (await response.json()).map(item => ({ id: item.id, quantity: item.quantity, product: item.products }));
@@ -30,10 +41,16 @@ async function loadCart() {
     }
     renderCart(items);
     updateCartCount();
+    return !syncFailed;
   } catch (error) {
+    cartStatus.dataset.state = 'error';
+    cartStatus.setAttribute('role', 'alert');
+    cartStatus.setAttribute('aria-live', 'assertive');
     cartStatus.textContent = error.message;
+    showToast(error.message, { type: 'error', title: 'Cart unavailable', announce: false });
     cartItemsDiv.replaceChildren();
     totalDiv.textContent = '';
+    return false;
   } finally {
     cartItemsDiv.removeAttribute('aria-busy');
   }
@@ -78,9 +95,17 @@ cartItemsDiv.addEventListener('click', async event => {
     } else {
       setGuestCartQuantity(id, button.dataset.action === 'remove' ? 0 : next);
     }
-    await loadCart();
+    if (await loadCart()) {
+      showToast(button.dataset.action === 'remove' || next <= 0 ? 'The item was removed from your cart.' : 'Your cart total has been updated.', {
+        title: button.dataset.action === 'remove' || next <= 0 ? 'Item removed' : 'Quantity updated'
+      });
+    }
   } catch (error) {
+    cartStatus.dataset.state = 'error';
+    cartStatus.setAttribute('role', 'alert');
+    cartStatus.setAttribute('aria-live', 'assertive');
     cartStatus.textContent = error.message;
+    showToast(error.message, { type: 'error', title: 'Cart not updated', announce: false });
     button.disabled = false;
   }
 });

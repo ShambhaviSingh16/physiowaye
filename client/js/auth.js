@@ -17,17 +17,21 @@ async function login() {
 
   if (!email || !password) {
     error.innerText = "All fields required";
+    showToast('Enter your email and password.', { type: 'error', title: 'Sign-in needs details', announce: false });
     return;
   }
 
-  const { data, error: authError } =
-    await supabaseClient.auth.signInWithPassword({
+  let data, authError;
+  try {
+    ({ data, error: authError } = await supabaseClient.auth.signInWithPassword({
       email,
       password
-    });
+    }));
+  } catch (requestError) { authError = requestError; }
 
   if (authError) {
-    error.innerText = authError.message;
+    error.innerText = authError.message || 'Please try again.';
+    showToast(error.innerText, { type: 'error', title: 'Could not sign in', announce: false });
     return;
   }
 
@@ -37,7 +41,11 @@ async function login() {
   );
 
   try { await syncGuestCart(); }
-  catch (syncError) { error.innerText = syncError.message; return; }
+  catch (syncError) {
+    error.innerText = syncError.message;
+    showToast('Your cart could not be synced. Please try again.', { type: 'error', title: 'Cart sync failed', announce: false });
+    return;
+  }
 
   if (await completePendingPurchase()) return;
 
@@ -66,11 +74,13 @@ async function register() {
 
   if (!name || !email || !password) {
     error.innerText = "All fields required";
+    showToast('Enter your name, email and password.', { type: 'error', title: 'Complete your details', announce: false });
     return;
   }
 
-  const { data, error: authError } =
-    await supabaseClient.auth.signUp({
+  let authError;
+  try {
+    ({ error: authError } = await supabaseClient.auth.signUp({
       email,
       password,
       options: {
@@ -78,16 +88,16 @@ async function register() {
           full_name: name
         }
       }
-    });
+    }));
+  } catch (requestError) { authError = requestError; }
 
   if (authError) {
-    error.innerText = authError.message;
+    error.innerText = authError.message || 'Please try again.';
+    showToast(error.innerText, { type: 'error', title: 'Account not created', announce: false });
     return;
   }
 
-  alert(
-    "Registration successful. Please verify your email."
-  );
+  showToastAfterNavigation('Check your email for the verification link, then sign in.', { title: 'Account created' });
 
   window.location.href = "login.html";
 }
@@ -97,13 +107,17 @@ async function register() {
 ========================================= */
 
 async function googleLogin() {
-
-  await supabaseClient.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: new URL("login.html", window.location.href).href
-    }
-  });
+  try {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: new URL("login.html", window.location.href).href
+      }
+    });
+    if (error) throw error;
+  } catch (error) {
+    showToast(error.message || 'Please try again.', { type: 'error', title: 'Google sign-in unavailable' });
+  }
 
 }
 
@@ -248,6 +262,7 @@ async function completePendingPurchase() {
       console.error("Pending cart action failed:", error);
       const loginError = document.getElementById("loginError");
       if (loginError) loginError.textContent = "You’re signed in, but we couldn’t add that item. Please try again from the product page.";
+      showToast('Please try again from the product page.', { type: 'error', title: 'Item not added', announce: false });
       return true;
     }
   }
@@ -321,71 +336,3 @@ document
   );
 
 
-let activeToast = null;
-let activeToastTimer = null;
-
-function showToast(message, options = {}) {
-  if (activeToast) activeToast.remove();
-  window.clearTimeout(activeToastTimer);
-
-  const type = options.type === "error" ? "error" : "success";
-  const toast = document.createElement("div");
-  toast.className = `toast-message toast-${type}`;
-  if (options.announce === false) {
-    toast.setAttribute("aria-hidden", "true");
-  } else {
-    toast.setAttribute("role", type === "error" ? "alert" : "status");
-  }
-  const icon = document.createElement("span");
-  icon.className = "toast-icon";
-  icon.setAttribute("aria-hidden", "true");
-  icon.textContent = type === "error" ? "!" : "✓";
-
-  const copy = document.createElement("div");
-  copy.className = "toast-copy";
-  const heading = document.createElement("strong");
-  heading.textContent = options.title || (type === "error" ? "Please try again" : "All set");
-  const detail = document.createElement("span");
-  detail.textContent = message;
-  copy.append(heading, detail);
-
-  toast.append(icon, copy);
-  if (options.actionHref && options.actionLabel) {
-    const action = document.createElement("a");
-    action.className = "toast-action";
-    action.href = options.actionHref;
-    action.textContent = options.actionLabel;
-    toast.append(action);
-  }
-
-  const dismiss = document.createElement("button");
-  dismiss.type = "button";
-  dismiss.className = "toast-dismiss";
-  dismiss.setAttribute("aria-label", "Dismiss notification");
-  dismiss.textContent = "×";
-  toast.append(dismiss);
-
-  const close = () => {
-    window.clearTimeout(activeToastTimer);
-    toast.classList.remove("show");
-    window.setTimeout(() => toast.remove(), 200);
-    if (activeToast === toast) activeToast = null;
-  };
-  const startDismissTimer = () => {
-    window.clearTimeout(activeToastTimer);
-    activeToastTimer = window.setTimeout(close, type === "error" ? 7000 : 5500);
-  };
-
-  dismiss.addEventListener("click", close);
-  toast.addEventListener("pointerenter", () => window.clearTimeout(activeToastTimer));
-  toast.addEventListener("pointerleave", startDismissTimer);
-  toast.addEventListener("focusin", () => window.clearTimeout(activeToastTimer));
-  toast.addEventListener("focusout", event => {
-    if (!toast.contains(event.relatedTarget)) startDismissTimer();
-  });
-
-  document.body.append(toast);
-  activeToast = toast;
-  window.requestAnimationFrame(() => toast.classList.add("show"));
-  startDismissTimer();
-}

@@ -1,4 +1,17 @@
 const content = document.getElementById('adminContent'), statusLine = document.getElementById('adminStatus');
+function clearAdminNotice() {
+  statusLine.textContent = '';
+  statusLine.dataset.state = '';
+  statusLine.setAttribute('role', 'status');
+  statusLine.setAttribute('aria-live', 'polite');
+}
+function notifyAdmin(message, type = 'success', title = '') {
+  statusLine.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  statusLine.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+  statusLine.textContent = message;
+  statusLine.dataset.state = type;
+  showToast(message, { type, title: title || (type === 'error' ? 'Action failed' : 'Done'), announce: false });
+}
 content.addEventListener('error', event => {
   const image = event.target;
   if (image.tagName !== 'IMG' || image.dataset.fallback) return;
@@ -71,7 +84,9 @@ function showGate(message='') {
   requestRevision++;
   document.getElementById('adminApp').hidden=true;
   document.getElementById('adminGate').hidden=false;
+  document.getElementById('gateStatus').dataset.state=message?'error':'idle';
   document.getElementById('gateStatus').textContent=message;
+  if(message)showToast(message,{type:'error',title:'Owner access unavailable',announce:false});
   content.replaceChildren(); products=[];
 }
 async function initialise() {
@@ -88,16 +103,19 @@ async function initialise() {
 }
 document.getElementById('adminLogin').addEventListener('submit',async event=>{
   event.preventDefault(); const button=event.target.querySelector('button');button.disabled=true;
+  document.getElementById('gateStatus').dataset.state='pending';
+  document.getElementById('gateStatus').textContent='Signing in…';
   try {
     const {error}=await supabaseClient.auth.signInWithPassword({email:document.getElementById('adminEmail').value.trim(),password:document.getElementById('adminPassword').value});
     if(error) throw error;
     document.getElementById('adminPassword').value='';await initialise();
-  } catch(error) { document.getElementById('gateStatus').textContent=error.message; }
+  } catch(error) { document.getElementById('gateStatus').dataset.state='error';document.getElementById('gateStatus').textContent=error.message;showToast(error.message,{type:'error',title:'Could not sign in',announce:false}); }
   finally {button.disabled=false;}
 });
 document.getElementById('adminGoogleLogin').addEventListener('click', async event => {
   const button = event.currentTarget;
   button.disabled = true;
+  document.getElementById('gateStatus').dataset.state = 'pending';
   document.getElementById('gateStatus').textContent = 'Opening Google sign-in…';
   try {
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
@@ -110,13 +128,15 @@ document.getElementById('adminGoogleLogin').addEventListener('click', async even
     if (error) throw error;
     if (!data?.url) throw new Error('Google sign-in could not be opened. Please try again.');
   } catch (error) {
+    document.getElementById('gateStatus').dataset.state = 'error';
     document.getElementById('gateStatus').textContent = error.message;
+    showToast(error.message,{type:'error',title:'Google sign-in unavailable',announce:false});
     button.disabled = false;
   }
 });
 async function signOut() {
   const {error}=await supabaseClient.auth.signOut();
-  if(error) {statusLine.textContent='Sign out failed. Please try again.';return;}
+  if(error) {notifyAdmin('Sign out failed. Please try again.','error','Could not sign out');return;}
   sessionStorage.removeItem('user');showGate();document.getElementById('gateSignOut').hidden=true;
 }
 document.getElementById('adminSignOut').onclick=signOut;document.getElementById('gateSignOut').onclick=signOut;
@@ -138,7 +158,7 @@ function ordersTable(rows) {
 }
 async function loadSection() {
   delete content.dataset.reference;
-  const revision=++requestRevision;statusLine.textContent='';content.setAttribute('aria-busy','true');content.innerHTML='<div class="panel loading-panel">Loading your store information…</div>';
+  const revision=++requestRevision;clearAdminNotice();content.setAttribute('aria-busy','true');content.innerHTML='<div class="panel loading-panel">Loading your store information…</div>';
   document.getElementById('sectionTitle').textContent=titles[section];
   document.querySelectorAll('[data-section]').forEach(button=>{button.classList.toggle('active',button.dataset.section===section);button.setAttribute('aria-current',button.dataset.section===section?'page':'false');});
   try {
@@ -162,12 +182,13 @@ async function loadSection() {
     } else {
       content.innerHTML=table(['When','Action','Details','Admin account ID'],data.rows.map(item=>`<tr><td>${esc(date(item.created_at))}</td><td>${esc(item.action.replaceAll('_',' '))}</td><td>${esc(item.summary)}</td><td>${esc(item.actor_id)}</td></tr>`))+pager(data);
     }
-  } catch(error) { if(revision===requestRevision){statusLine.textContent=error.message;content.innerHTML='<button data-retry>Try again</button>';}}
+    return true;
+  } catch(error) { if(revision===requestRevision){notifyAdmin(error.message,'error','Store information unavailable');content.innerHTML='<button data-retry>Try again</button>';}return false;}
   finally {content.setAttribute('aria-busy','false');}
 }
 function customerDetails(user){return `<dl class="customer-summary"><dt>Email</dt><dd>${esc(user.email)}</dd><dt>Account phone</dt><dd>${esc(user.phone||'Not provided')}</dd><dt>Sign-in providers</dt><dd>${esc(user.providers.join(', ') || 'Not available')}</dd><dt>Created</dt><dd>${esc(date(user.created_at))}</dd><dt>Last sign-in</dt><dd>${esc(date(user.last_sign_in_at))}</dd></dl>`;}
 async function openOrder(reference) {
-  const revision=++requestRevision;statusLine.textContent='';content.innerHTML='<div class="panel loading-panel">Loading order details…</div>';
+  const revision=++requestRevision;clearAdminNotice();content.innerHTML='<div class="panel loading-panel">Loading order details…</div>';
   try {
     const order=await request(`/orders/${encodeURIComponent(reference)}`);if(revision!==requestRevision)return;
     const details=order.details||{}, delivery=details.delivery||{}, payment=details.payment||{}, shipment=details.shipment||{};
@@ -176,10 +197,11 @@ async function openOrder(reference) {
     const events=[...(details.tracking||[]),...(shipment.events||[])].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
     content.innerHTML=`<div class="toolbar"><button class="secondary" data-back>← Back to ${customerId?'customer':'orders'}</button></div><section class="panel"><span class="kicker">ORDER REFERENCE</span><h2 class="reference">${esc(order.public_reference)}</h2><div class="actions"><button data-copy="${esc(order.public_reference)}">Copy order reference</button>${badge(order.status)}${badge(payment.status||'Payment unverified')}${details.test_mode?badge('Test order'):''}</div><p>Placed ${esc(date(order.created_at))}</p><div class="notice">Use this exact reference as the Order ID in Delhivery One. Create the shipment there as usual.</div></section><div class="detail-grid"><section class="panel"><h3>Delivery & contact</h3>${delivery.name?`<strong>${esc(delivery.name)}</strong><p>${esc(delivery.address)}<br>${esc(delivery.city)}, ${esc(delivery.state)} ${esc(delivery.pincode)}</p><p>${esc(delivery.phone)}<br>${esc(delivery.email)}</p>`:'<p>No delivery snapshot was saved for this earlier order.</p>'}</section><section class="panel"><h3>Payment</h3><p>${esc(payment.status||'Unverified')}<br>${esc(payment.method||'Method unavailable')}${payment.bank?` · ${esc(payment.bank)}`:''}${payment.card_last4?` · Card ending ${esc(payment.card_last4)}`:''}</p><dl><dt>Payment reference</dt><dd>${esc(payment.id||'Not recorded')}</dd><dt>Verified</dt><dd>${esc(date(payment.verified_at))}</dd></dl></section><section class="panel"><h3>Price breakdown</h3><p>Items: ${money(subtotal)}<br>Delivery: ${money(details.shipping||0)}<br>Other recorded charges: ${money(Number(order.total_amount)-subtotal-Number(details.shipping||0))}</p><strong>Total ${money(order.total_amount)}</strong></section></div><section class="panel"><h2>Purchased products</h2>${table(['Product','Quantity','Unit price','Total'],items.map(item=>`<tr><td><strong>${esc(item.name||'Equipment')}</strong>${esc(item.description||'')}</td><td>${esc(item.qty)}</td><td>${money(item.price)}</td><td>${money(Number(item.qty)*Number(item.price))}</td></tr>`))}</section><section class="panel"><h2>Shipment updates</h2><p>${esc(shipment.carrier||'Awaiting shipment')} · ${esc(shipment.status||order.status)}<br>AWB: ${esc(shipment.tracking_number||'Not assigned')}<br>Last checked: ${esc(date(shipment.synced_at))}</p><button class="secondary" data-sync="${esc(order.public_reference)}">Check Delhivery updates</button><ul class="timeline">${events.map(item=>`<li><strong>${esc(item.status)}</strong><time>${esc(date(item.at))}</time><p>${esc(item.note||'')}<br>${esc(item.location||'')}</p></li>`).join('')}</ul></section>`;
     content.dataset.reference=reference;
-  } catch(error){if(revision===requestRevision)statusLine.textContent=error.message;}
+    return true;
+  } catch(error){if(revision===requestRevision)notifyAdmin(error.message,'error','Order unavailable');return false;}
 }
 function productForm(product=null) {
-  requestRevision++; selectedProduct=product;galleryDraft=existingProductImages(product);statusLine.textContent='';const p=product||{};
+  requestRevision++; selectedProduct=product;galleryDraft=existingProductImages(product);clearAdminNotice();const p=product||{};
   content.innerHTML=`<div class="toolbar"><button class="secondary" data-back>← Back to catalog</button></div><section class="panel"><h2>${product?'Edit product':'Add a product'}</h2><form id="productForm" class="form-grid">
     <label>Product name<input name="product_name" required minlength="2" maxlength="250" value="${esc(p.product_name)}"></label>
     <label>SKU<input name="sku" required pattern="[A-Za-z0-9_-]{2,60}" value="${esc(p.sku)}"><small>Unique code, e.g. PW-012</small></label>
@@ -194,7 +216,7 @@ function productForm(product=null) {
   renderImageEditor();
 }
 content.addEventListener('click',async event=>{
-  const button=event.target.closest('button');if(!button)return;statusLine.textContent='';
+  const button=event.target.closest('button');if(!button)return;clearAdminNotice();
   if(button.hasAttribute('data-image-add')){if(galleryDraft.length<6){galleryDraft.push('');renderImageEditor();}return;}
   if(button.hasAttribute('data-image-remove')){galleryDraft.splice(Number(button.dataset.imageRemove),1);renderImageEditor();return;}
   if(button.hasAttribute('data-image-up')){const index=Number(button.dataset.imageUp);if(index>0){[galleryDraft[index-1],galleryDraft[index]]=[galleryDraft[index],galleryDraft[index-1]];renderImageEditor();}return;}
@@ -207,9 +229,9 @@ content.addEventListener('click',async event=>{
   if(button.hasAttribute('data-retry'))return loadSection();
   if(button.hasAttribute('data-back')){if(section==='customers' && !content.dataset.reference)customerId=null;delete content.dataset.reference;return loadSection();}
   try {
-    if(button.hasAttribute('data-copy')){await navigator.clipboard.writeText(button.dataset.copy);statusLine.textContent='Order reference copied.';const previous=button.textContent;button.textContent='Copied!';setTimeout(()=>{button.textContent=previous;},1800);}
-    if(button.hasAttribute('data-sync')){button.disabled=true;const result=await request(`/orders/${encodeURIComponent(button.dataset.sync)}/tracking`,{method:'POST'});await openOrder(button.dataset.sync);statusLine.textContent=result.linked?'Tracking updated.':'No matching shipment yet. Use this order reference when creating it in Delhivery One.';}
-  } catch(error){statusLine.textContent=error.message;}finally{button.disabled=false;}
+    if(button.hasAttribute('data-copy')){await navigator.clipboard.writeText(button.dataset.copy);notifyAdmin('Order reference copied.','success','Copied');const previous=button.textContent;button.textContent='Copied!';setTimeout(()=>{button.textContent=previous;},1800);}
+    if(button.hasAttribute('data-sync')){button.disabled=true;const result=await request(`/orders/${encodeURIComponent(button.dataset.sync)}/tracking`,{method:'POST'});if(await openOrder(button.dataset.sync))notifyAdmin(result.linked?'The latest shipment details are shown.':'No matching shipment yet. Use this order reference in Delhivery One.',result.linked?'success':'info',result.linked?'Tracking updated':'Shipment not linked yet');}
+  } catch(error){notifyAdmin(error.message,'error','Action failed');}finally{button.disabled=false;}
 });
 content.addEventListener('submit',async event=>{
   event.preventDefault();const form=event.target;
@@ -221,11 +243,11 @@ content.addEventListener('submit',async event=>{
   data.image_urls=galleryDraft.map(url=>String(url).trim()).filter(Boolean);
   data.image_url=data.image_urls[0]||'';
   if(selectedProduct){data.id=selectedProduct.id;data.admin_revision=selectedProduct.admin_revision;}
-  if(Number(data.selling_price)>Number(data.mrp)){statusLine.textContent='Selling price cannot exceed MRP.';return;}
+  if(Number(data.selling_price)>Number(data.mrp)){notifyAdmin('Selling price cannot exceed MRP.','error','Check the price');return;}
   if(!confirm(data.is_active?'Save these product details?':'Archive this product? It will disappear from sale, but past orders will remain.'))return;
   const button=form.querySelector('[type=submit]');button.disabled=true;
-  try {await request('/products',{method:'POST',body:JSON.stringify(data)});await loadSection();statusLine.textContent='Product saved.';}
-  catch(error){statusLine.textContent=error.message;}finally{button.disabled=false;}
+  try {await request('/products',{method:'POST',body:JSON.stringify(data)});if(await loadSection())notifyAdmin(data.is_active?'Product details are now saved.':'This product is no longer available in the store.','success',data.is_active?'Product saved':'Product archived');}
+  catch(error){notifyAdmin(error.message,'error','Product not saved');}finally{button.disabled=false;}
 });
 content.addEventListener('change',async event=>{
   if(event.target.hasAttribute('data-image-url')) {
@@ -244,10 +266,10 @@ content.addEventListener('change',async event=>{
   if(event.target.id==='productImageBatch' && !galleryUploading) {
     const files=[...event.target.files];
     if(!files.length)return;
-    if(files.length>6-galleryDraft.length){statusLine.textContent='Remove existing images or choose fewer files. A product can have up to 6 photos.';return;}
-    if(files.some(file=>file.size>5242880 || !['image/jpeg','image/png','image/webp'].includes(file.type))){statusLine.textContent='Each photo must be a JPEG, PNG or WebP image up to 5 MB.';return;}
+    if(files.length>6-galleryDraft.length){notifyAdmin('Remove existing images or choose fewer files. A product can have up to 6 photos.','error','Too many photos');return;}
+    if(files.some(file=>file.size>5242880 || !['image/jpeg','image/png','image/webp'].includes(file.type))){notifyAdmin('Each photo must be a JPEG, PNG or WebP image up to 5 MB.','error','Photo not accepted');return;}
     const form=event.target.closest('#productForm');
-    const button=form.querySelector('[type=submit]');galleryUploading=true;button.disabled=true;
+    const button=form.querySelector('[type=submit]');galleryUploading=true;button.disabled=true;clearAdminNotice();
     try {
       for(const file of files) {
         statusLine.textContent=`Uploading image ${files.indexOf(file)+1} of ${files.length}…`;
@@ -256,22 +278,22 @@ content.addEventListener('change',async event=>{
         galleryDraft.push(result.url);
         renderImageEditor();
       }
-      statusLine.textContent='Photos uploaded. Save the product to publish them.';
-    } catch(error){statusLine.textContent=`${error.message} Any uploaded photos are shown below; save the product to keep them.`;}
+      notifyAdmin('Save the product to publish the uploaded photos.','info','Photos uploaded');
+    } catch(error){notifyAdmin(`${error.message} Any uploaded photos are shown below; save the product to keep them.`,'error','Upload interrupted');}
     finally{galleryUploading=false;button.disabled=false;}
     return;
   }
   if(!event.target.hasAttribute('data-image-file') || galleryUploading)return;
   const file=event.target.files[0];if(!file)return;
-  if(file.size>5242880 || !['image/jpeg','image/png','image/webp'].includes(file.type)){statusLine.textContent='Choose a JPEG, PNG or WebP image up to 5 MB.';return;}
+  if(file.size>5242880 || !['image/jpeg','image/png','image/webp'].includes(file.type)){notifyAdmin('Choose a JPEG, PNG or WebP image up to 5 MB.','error','Photo not accepted');return;}
   const form=event.target.closest('#productForm');
   const index=Number(event.target.dataset.imageFile);
-  const button=form.querySelector('[type=submit]');galleryUploading=true;button.disabled=true;statusLine.textContent='Uploading image…';
+  const button=form.querySelector('[type=submit]');galleryUploading=true;button.disabled=true;clearAdminNotice();statusLine.textContent='Uploading image…';
   try {
     const result=await request('/images',{method:'POST',headers:{'Content-Type':file.type},body:await file.arrayBuffer()});
-    if(document.getElementById('productForm')===form){galleryDraft[index]=result.url;renderImageEditor();statusLine.textContent='Image uploaded. Save the product to publish it.';}
+    if(document.getElementById('productForm')===form){galleryDraft[index]=result.url;renderImageEditor();notifyAdmin('Save the product to publish this photo.','info','Photo uploaded');}
   }
-  catch(error){statusLine.textContent=error.message;}finally{galleryUploading=false;button.disabled=false;}
+  catch(error){notifyAdmin(error.message,'error','Photo not uploaded');}finally{galleryUploading=false;button.disabled=false;}
 });
 supabaseClient.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')showGate();});
 initialise();

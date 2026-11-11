@@ -31,6 +31,11 @@
   border-left-color: #c85248;
 }
 
+.toast-message.toast-info {
+  border-color: #cfe5ef;
+  border-left-color: #168fb8;
+}
+
 .toast-icon {
   display: grid;
   width: 32px;
@@ -49,6 +54,12 @@
   color: #b03c34;
 }
 
+.toast-info .toast-icon {
+  background: #e3f3f9;
+  color: #087da5;
+  font-size: 15px;
+}
+
 .toast-copy {
   display: grid;
   gap: 3px;
@@ -63,9 +74,14 @@
 }
 
 .toast-copy span {
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   color: #51687a;
   font-size: .82rem;
   font-weight: 400;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .toast-action {
@@ -171,6 +187,64 @@
 .page-contact .contact-form .contact-form-note[data-state="error"]::before {
   content: "!";
   background: #fbe0dc;
+}
+
+.page-login .access-error:not(:empty),
+.page-register .access-error:not(:empty),
+.page-cart #cartStatus[data-state="error"]:not(:empty),
+.page-profile #profileStatus[data-state="error"],
+.checkout-page #checkoutStatus[data-state="error"]:not(:empty),
+#adminStatus[data-state="error"]:not(:empty) {
+  display: block;
+  padding: 12px 14px;
+  border: 1px solid #f0d6d2;
+  border-left: 4px solid #c85248;
+  border-radius: 9px;
+  background: #fff3f1;
+  color: #8c342e;
+  line-height: 1.6;
+}
+
+#gateStatus[data-state="error"]:not(:empty) {
+  padding: 12px 14px;
+  border: 1px solid #f0d6d2;
+  border-left: 4px solid #c85248;
+  border-radius: 9px;
+  background: #fff3f1;
+  color: #8c342e;
+}
+
+#gateStatus[data-state="pending"]:not(:empty) {
+  color: #23617b;
+}
+
+.page-profile #profileStatus[data-state="success"],
+#adminStatus[data-state="success"]:not(:empty) {
+  display: block;
+  padding: 12px 14px;
+  border: 1px solid #cce8d7;
+  border-left: 4px solid #22945b;
+  border-radius: 9px;
+  background: #edf8f0;
+  color: #225d3e;
+  line-height: 1.6;
+}
+
+.checkout-page #checkoutStatus[data-state="info"]:not(:empty),
+#adminStatus[data-state="info"]:not(:empty) {
+  display: block;
+  padding: 12px 14px;
+  border: 1px solid #cfe5ef;
+  border-left: 4px solid #168fb8;
+  border-radius: 9px;
+  background: #eef8fc;
+  color: #23617b;
+  line-height: 1.6;
+}
+
+.page-cart #cartStatus:empty,
+#adminStatus:empty {
+  display: none;
 }
 
 @media (max-width: 600px) {
